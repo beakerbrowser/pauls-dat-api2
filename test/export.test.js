@@ -1,19 +1,28 @@
 const test = require('ava')
+const tmp = require('tmp-promise')
 const fs = require('fs')
 const path = require('path')
 const tutil = require('./util')
 const pda = require('../index')
 
+var daemon
+
+test.before(async () => {
+  daemon = await tutil.createOneDaemon()
+})
+test.after(async () => {
+  await daemon.cleanup()
+})
+
 test('exportFilesystemToArchive', async t => {
-  const srcPath = tutil.tmpdir()
+  const srcPath = (await tmp.dir({ unsafeCleanup: true })).path
   fs.writeFileSync(path.join(srcPath, 'foo.txt'), 'content')
   fs.writeFileSync(path.join(srcPath, 'bar.data'), Buffer.from([0x00, 0x01]))
   fs.mkdirSync(path.join(srcPath, 'subdir'))
   fs.writeFileSync(path.join(srcPath, 'subdir', 'foo.txt'), 'content')
   fs.writeFileSync(path.join(srcPath, 'subdir', 'bar.data'), Buffer.from([0x00, 0x01]))
 
-  const dstArchive = await tutil.createArchive()
-  await new Promise(resolve => dstArchive.ready(resolve))
+  const dstArchive = await tutil.createArchive(daemon)
 
   // initial import (dry run)
   // =
@@ -33,7 +42,7 @@ test('exportFilesystemToArchive', async t => {
   t.deepEqual(statsADry.removedFolders, [])
   t.deepEqual(statsADry.skipCount, 0)
   t.deepEqual(statsADry.fileCount, 4)
-  t.deepEqual(await pda.readdir(dstArchive, '/'), [])
+  t.deepEqual(await pda.readdir(dstArchive, '/'), ['.key'])
 
   // initial import
   // =
@@ -61,9 +70,9 @@ test('exportFilesystemToArchive', async t => {
     dstArchive,
     inplaceImport: true
   })
-  var expectedUpdatedB = ['/bar.data', '/foo.txt', '/subdir/bar.data', '/subdir/foo.txt']
+  var expectedUpdatedB = ['/bar.data', '/foo.txt', '/subdir/bar.data', '/subdir/foo.txt'].sort()
   t.deepEqual(statsB.addedFiles, [])
-  t.deepEqual(statsB.updatedFiles.map(tutil.tonix), expectedUpdatedB)
+  t.deepEqual(statsB.updatedFiles.map(tutil.tonix).sort(), expectedUpdatedB)
   t.deepEqual(statsB.skipCount, 0)
   t.deepEqual(statsB.fileCount, 4)
 
@@ -93,7 +102,7 @@ test('exportFilesystemToArchive', async t => {
   t.deepEqual(statsDDry.addedFolders.map(tutil.tonix), ['/subdir2'])
   t.deepEqual(statsDDry.skipCount, 0)
   t.deepEqual(statsDDry.fileCount, 5)
-  t.deepEqual((await pda.readdir(dstArchive, '/')).length, 3)
+  t.deepEqual((await pda.readdir(dstArchive, '/')).length, 4)
 
   // 2 changes, 2 additions
   // =
@@ -174,7 +183,7 @@ test('exportFilesystemToArchive', async t => {
 })
 
 test('exportArchiveToFilesystem', async t => {
-  const srcArchive = await tutil.createArchive([
+  const srcArchive = await tutil.createArchive(daemon, [
     'foo.txt',
     { name: 'bar.data', content: Buffer.from([0x00, 0x01]) },
     'subdir/',
@@ -182,8 +191,8 @@ test('exportArchiveToFilesystem', async t => {
     { name: 'subdir/bar.data', content: Buffer.from([0x00, 0x01]) }
   ])
 
-  const dstPathA = tutil.tmpdir()
-  const dstPathB = tutil.tmpdir()
+  const dstPathA = (await tmp.dir({ unsafeCleanup: true })).path
+  const dstPathB = (await tmp.dir({ unsafeCleanup: true })).path
 
   // export all
   // =
@@ -193,11 +202,11 @@ test('exportArchiveToFilesystem', async t => {
     dstPath: dstPathA
   })
 
-  const expectedAddedFilesA = ['foo.txt', 'bar.data', 'subdir/foo.txt', 'subdir/bar.data'].map(n => path.join(dstPathA, n))
+  const expectedAddedFilesA = ['.key', 'foo.txt', 'bar.data', 'subdir/foo.txt', 'subdir/bar.data'].map(n => path.join(dstPathA, n))
   statsA.addedFiles.sort(); expectedAddedFilesA.sort()
   t.deepEqual(statsA.addedFiles, expectedAddedFilesA)
   t.deepEqual(statsA.updatedFiles, [])
-  t.deepEqual(statsA.fileCount, 4)
+  t.deepEqual(statsA.fileCount, 5)
 
   // fail export
   // =
@@ -220,7 +229,7 @@ test('exportArchiveToFilesystem', async t => {
   statsB.updatedFiles.sort()
   t.deepEqual(statsB.addedFiles, [])
   t.deepEqual(statsB.updatedFiles, expectedAddedFilesA)
-  t.deepEqual(statsB.fileCount, 4)
+  t.deepEqual(statsB.fileCount, 5)
 
   // export subdir
   // =
@@ -239,7 +248,7 @@ test('exportArchiveToFilesystem', async t => {
 })
 
 test('exportArchiveToArchive', async t => {
-  const srcArchiveA = await tutil.createArchive([
+  const srcArchiveA = await tutil.createArchive(daemon, [
     'foo.txt',
     { name: 'bar.data', content: Buffer.from([0x00, 0x01]) },
     'subdir/',
@@ -247,11 +256,11 @@ test('exportArchiveToArchive', async t => {
     { name: 'subdir/bar.data', content: Buffer.from([0x00, 0x01]) }
   ])
 
-  const dstArchiveA = await tutil.createArchive()
-  const dstArchiveB = await tutil.createArchive()
-  const dstArchiveC = await tutil.createArchive()
-  const dstArchiveD = await tutil.createArchive()
-  const dstArchiveE = await tutil.createArchive([
+  const dstArchiveA = await tutil.createArchive(daemon)
+  const dstArchiveB = await tutil.createArchive(daemon)
+  const dstArchiveC = await tutil.createArchive(daemon)
+  const dstArchiveD = await tutil.createArchive(daemon)
+  const dstArchiveE = await tutil.createArchive(daemon, [
     {name: 'foo.txt', content: 'asdf'},
     'bar.data/',
     'subdir/',
@@ -261,11 +270,6 @@ test('exportArchiveToArchive', async t => {
     'otherfile.txt'
   ])
 
-  await new Promise(resolve => dstArchiveA.ready(resolve))
-  await new Promise(resolve => dstArchiveB.ready(resolve))
-  await new Promise(resolve => dstArchiveC.ready(resolve))
-  await new Promise(resolve => dstArchiveD.ready(resolve))
-  await new Promise(resolve => dstArchiveE.ready(resolve))
 
   // export all
   // =
@@ -275,7 +279,7 @@ test('exportArchiveToArchive', async t => {
     dstArchive: dstArchiveA
   })
 
-  t.deepEqual((await pda.readdir(dstArchiveA, '/')).sort(), ['bar.data', 'foo.txt', 'subdir'])
+  t.deepEqual((await pda.readdir(dstArchiveA, '/')).sort(), ['.key', 'bar.data', 'foo.txt', 'subdir'].sort())
   t.deepEqual((await pda.readdir(dstArchiveA, '/subdir')).sort(), ['bar.data', 'foo.txt'])
 
   // export from subdir
@@ -287,7 +291,7 @@ test('exportArchiveToArchive', async t => {
     srcPath: '/subdir'
   })
 
-  t.deepEqual((await pda.readdir(dstArchiveB, '/')).sort(), ['bar.data', 'foo.txt'])
+  t.deepEqual((await pda.readdir(dstArchiveB, '/')).sort(), ['.key', 'bar.data', 'foo.txt'].sort())
 
   // export to subdir
   // =
@@ -298,8 +302,8 @@ test('exportArchiveToArchive', async t => {
     dstPath: '/gpdir'
   })
 
-  t.deepEqual((await pda.readdir(dstArchiveC, '/')).sort(), ['gpdir'])
-  t.deepEqual((await pda.readdir(dstArchiveC, '/gpdir')).sort(), ['bar.data', 'foo.txt', 'subdir'])
+  t.deepEqual((await pda.readdir(dstArchiveC, '/')).sort(), ['.key', 'gpdir'].sort())
+  t.deepEqual((await pda.readdir(dstArchiveC, '/gpdir')).sort(), ['.key', 'bar.data', 'foo.txt', 'subdir'].sort())
   t.deepEqual((await pda.readdir(dstArchiveC, '/gpdir/subdir')).sort(), ['bar.data', 'foo.txt'])
 
   // export from subdir to subdir
@@ -312,7 +316,7 @@ test('exportArchiveToArchive', async t => {
     dstPath: '/gpdir'
   })
 
-  t.deepEqual((await pda.readdir(dstArchiveD, '/')).sort(), ['gpdir'])
+  t.deepEqual((await pda.readdir(dstArchiveD, '/')).sort(), ['.key', 'gpdir'].sort())
   t.deepEqual((await pda.readdir(dstArchiveD, '/gpdir')).sort(), ['bar.data', 'foo.txt'])
 
   // export all and overwrite target
@@ -323,7 +327,7 @@ test('exportArchiveToArchive', async t => {
     dstArchive: dstArchiveE
   })
 
-  t.deepEqual((await pda.readdir(dstArchiveE, '/')).sort(), ['bar.data', 'foo.txt', 'otherfile.txt', 'subdir'])
+  t.deepEqual((await pda.readdir(dstArchiveE, '/')).sort(), ['.key', 'bar.data', 'foo.txt', 'otherfile.txt', 'subdir'].sort())
   t.deepEqual((await pda.readdir(dstArchiveE, '/subdir')).sort(), ['bar.data', 'foo.txt'])
 
   // into bad subdir

@@ -1,17 +1,93 @@
-const hyperdrive = require('hyperdrive')
 const ScopedFS = require('scoped-fs')
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
+const tmp = require('tmp-promise')
+const dht = require('@hyperswarm/dht')
+const loadClient = require('hyperdrive-daemon-client/lib/loader')
+const HyperdriveDaemon = require('hyperdrive-daemon')
 
-const FAKE_DAT_KEY = 'f'.repeat(64)
+const BASE_PORT = 4101
+const BOOTSTRAP_PORT = 3100
+const BOOTSTRAP_URL = `localhost:${BOOTSTRAP_PORT}`
 
-function createArchive (names) {
-  return populate(hyperdrive(tmpdir()), names)
+const FAKE_DAT_KEY = new Buffer('f'.repeat(64), 'hex')
+
+async function createDaemon (numServers) {
+  const cleanups = []
+  const clients = []
+
+  const bootstrapper = dht({
+    bootstrap: false
+  })
+  bootstrapper.listen(BOOTSTRAP_PORT)
+  await new Promise(resolve => {
+    return bootstrapper.once('listening', resolve)
+  })
+
+  for (let i = 0; i < numServers; i++) {
+    const { client, cleanup } = await createDaemonInstance(i, BASE_PORT + i, [BOOTSTRAP_URL])
+    clients.push(client)
+    cleanups.push(cleanup)
+  }
+
+  return { clients, cleanup }
+
+  async function cleanup () {
+    for (let cleanupInstance of cleanups) {
+      await cleanupInstance()
+    }
+    await bootstrapper.destroy()
+  }
 }
 
-function createFs (names) {
-  return populate(new ScopedFS(tmpdir()), names)
+async function createOneDaemon () {
+  const { clients, cleanup } = await createDaemon(1)
+  return {
+    client: clients[0],
+    cleanup
+  }
+}
+
+async function createDaemonInstance (id, port, bootstrap) {
+  const { path, cleanup: dirCleanup } = await tmp.dir({ unsafeCleanup: true })
+
+  const token = `test-token-${id}`
+  const endpoint = `localhost:${port}`
+  var client
+
+  const daemon = new HyperdriveDaemon({
+    storage: path,
+    bootstrap,
+    port,
+    metadata: {
+      token,
+      endpoint
+    }
+  })
+  await daemon.start()
+
+  return new Promise((resolve, reject) => {
+    return loadClient(endpoint, token, (err, c) => {
+      client = c
+      if (err) return reject(err)
+      return resolve({
+        client,
+        cleanup
+      })
+    })
+  })
+
+  async function cleanup () {
+    await daemon.stop()
+    await dirCleanup()
+  }
+}
+
+async function createArchive (daemon, names, key = undefined) {
+  var archive = await daemon.client.drive.get({key})
+  return populate(archive, names)
+}
+
+async function createFs (names) {
+  return populate(new ScopedFS((await tmp.dir({ unsafeCleanup: true })).path), names)
 }
 
 async function populate (target, names) {
@@ -36,12 +112,8 @@ async function populate (target, names) {
   return target
 }
 
-function tmpdir () {
-  return fs.mkdtempSync(os.tmpdir() + path.sep + 'pauls-dat-api-test-')
-}
-
 function tonix (str) {
   return str.replace(/\\/g, '/')
 }
 
-module.exports = {FAKE_DAT_KEY, createArchive, createFs, tmpdir, tonix}
+module.exports = {FAKE_DAT_KEY, createDaemon, createOneDaemon, createArchive, createFs, tonix}

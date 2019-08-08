@@ -1,10 +1,18 @@
 const test = require('ava')
-const hyperdrive = require('hyperdrive')
 const tutil = require('./util')
 const pda = require('../index')
 
+var daemon
+
+test.before(async () => {
+  daemon = await tutil.createOneDaemon()
+})
+test.after(async () => {
+  await daemon.cleanup()
+})
+
 test('writeFile', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     'foo'
   ])
 
@@ -36,12 +44,12 @@ test('writeFile w/fs', async t => {
 })
 
 test('mkdir', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     'foo'
   ])
 
   await pda.mkdir(archive, '/bar')
-  t.deepEqual((await pda.readdir(archive, '/')).sort(), ['bar', 'foo'])
+  t.deepEqual((await pda.readdir(archive, '/')).sort(), ['.key', 'bar', 'foo'].sort())
   t.deepEqual((await pda.stat(archive, '/bar')).isDirectory(), true)
 })
 
@@ -56,7 +64,7 @@ test('mkdir w/fs', async t => {
 })
 
 test('copy', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     {name: 'a', content: 'thecopy'},
     'b/',
     'b/a',
@@ -129,7 +137,7 @@ test('copy w/fs', async t => {
 })
 
 test('rename', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     'a',
     'b/',
     'b/a',
@@ -198,8 +206,7 @@ test('rename w/fs', async t => {
 })
 
 test('EntryAlreadyExistsError', async t => {
-  var archive = await tutil.createArchive([])
-  await new Promise(resolve => archive.ready(resolve))
+  var archive = await tutil.createArchive(daemon, [])
 
   await pda.mkdir(archive, '/dir')
   const err1 = await t.throws(pda.writeFile(archive, '/dir', 'new content'))
@@ -247,8 +254,7 @@ test('EntryAlreadyExistsError w/fs', async t => {
 })
 
 test('ArchiveNotWritableError', async t => {
-  const archive = hyperdrive(tutil.tmpdir(), tutil.FAKE_DAT_KEY, {createIfMissing: false})
-  await new Promise(resolve => archive.ready(resolve))
+  var archive = await tutil.createArchive(daemon, [], tutil.FAKE_DAT_KEY)
 
   const err1 = await t.throws(pda.mkdir(archive, '/bar'))
   t.truthy(err1.archiveNotWritable)
@@ -264,8 +270,7 @@ test('ArchiveNotWritableError', async t => {
 })
 
 test('InvalidPathError', async t => {
-  var archive = await tutil.createArchive([])
-  await new Promise(resolve => archive.ready(resolve))
+  var archive = await tutil.createArchive(daemon, [])
 
   const err1 = await t.throws(pda.writeFile(archive, '/foo%20bar', 'new content'))
   t.truthy(err1.invalidPath)
@@ -303,7 +308,7 @@ test('InvalidPathError w/fs', async t => {
 })
 
 test('ParentFolderDoesntExistError', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     'foo'
   ])
 

@@ -2,9 +2,18 @@ const test = require('ava')
 const tutil = require('./util')
 const pda = require('../index')
 
+var daemon
+
+test.before(async () => {
+  daemon = await tutil.createOneDaemon()
+})
+test.after(async () => {
+  await daemon.cleanup()
+})
+
 test('findEntryByContentBlock', async t => {
   var st
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     {name: 'a', content: 'a'},
     'b/',
     {name: 'b/a', content: 'b/a'},
@@ -16,7 +25,6 @@ test('findEntryByContentBlock', async t => {
     'c/',
     {name: 'd', content :'d'}
   ])
-  await new Promise(resolve => archive.ready(resolve))
 
   st = await pda.stat(archive, '/a')
   t.deepEqual((await pda.findEntryByContentBlock(archive, st.offset)).name, '/a')

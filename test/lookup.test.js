@@ -2,7 +2,16 @@ const test = require('ava')
 const tutil = require('./util')
 const pda = require('../index')
 
+var daemon
 var target
+
+test.before(async () => {
+  daemon = await tutil.createOneDaemon()
+})
+test.after(async () => {
+  await daemon.cleanup()
+})
+
 async function stat (t, given, expected) {
   // run test
   try {
@@ -14,13 +23,13 @@ async function stat (t, given, expected) {
     t.falsy(entry)
   }
 }
+stat.title = (_, given, expected) => `stat(${given}) is ${expected ? 'found' : 'not found'}`
 
 // without preceding slashes
 // =
 
-stat.title = (_, given, expected) => `stat(${given}) is ${expected ? 'found' : 'not found'}`
 test('create archive', async t => {
-  target = await tutil.createArchive([
+  target = await tutil.createArchive(daemon, [
     'foo',
     'subdir/',
     'subdir/bar',
@@ -41,7 +50,7 @@ test(stat, 'notfound', false)
 
 stat.title = (_, given, expected) => `stat(${given}) is ${expected ? 'found' : 'not found'}`
 test('create archive', async t => {
-  target = await tutil.createArchive([
+  target = await tutil.createArchive(daemon, [
     '/foo',
     '/subdir/',
     '/subdir/bar',
@@ -103,7 +112,7 @@ test(stat, 'notfound', false)
 // =
 
 test('files have metadata, folders have no metadata', async t => {
-  target = await tutil.createArchive([
+  target = await tutil.createArchive(daemon, [
     '/foo',
     '/subdir/',
     '/subdir/bar',

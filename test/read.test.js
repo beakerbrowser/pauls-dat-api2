@@ -3,7 +3,16 @@ const {NotFoundError, NotAFileError} = require('beaker-error-constants')
 const tutil = require('./util')
 const pda = require('../index')
 
+var daemon
 var target
+
+test.before(async () => {
+  daemon = await tutil.createOneDaemon()
+})
+test.after(async () => {
+  await daemon.cleanup()
+})
+
 async function readTest (t, path, expected, errorTests) {
   try {
     var data = await pda.readFile(target, path, Buffer.isBuffer(expected) ? 'binary' : 'utf8')
@@ -13,10 +22,11 @@ async function readTest (t, path, expected, errorTests) {
     else throw e
   }
 }
-
 readTest.title = (_, path) => `readFile(${path}) test`
+
+
 test('create archive', async t => {
-  target = await tutil.createArchive([
+  target = await tutil.createArchive(daemon, [
     'foo',
     'foo2/',
     'foo2/bar',
@@ -67,7 +77,7 @@ test(readTest, 'dir/', null, (t, err) => {
 })
 
 test('readFile encodings', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     { name: 'buf', content: Buffer.from([0x00, 0x01, 0x02, 0x03]) }
   ])
 
@@ -87,14 +97,14 @@ test('readFile encodings w/fs', async t => {
 })
 
 test('readdir', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     'foo/',
     'foo/bar',
     'baz'
   ])
 
-  t.deepEqual(await pda.readdir(archive, ''), ['foo', 'baz'])
-  t.deepEqual(await pda.readdir(archive, '/'), ['foo', 'baz'])
+  t.deepEqual((await pda.readdir(archive, '')).sort(), ['.key', 'foo', 'baz'].sort())
+  t.deepEqual((await pda.readdir(archive, '/')).sort(), ['.key', 'foo', 'baz'].sort())
   t.deepEqual(await pda.readdir(archive, 'foo'), ['bar'])
   t.deepEqual(await pda.readdir(archive, '/foo'), ['bar'])
   t.deepEqual(await pda.readdir(archive, '/foo/'), ['bar'])
@@ -115,7 +125,7 @@ test('readdir w/fs', async t => {
 })
 
 test('readdir recursive', async t => {
-  var archive = await tutil.createArchive([
+  var archive = await tutil.createArchive(daemon, [
     'a',
     'b/',
     'b/a',
@@ -129,6 +139,7 @@ test('readdir recursive', async t => {
   ])
 
   t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).map(tutil.tonix).sort(), [
+    '.key',
     'a',
     'b',
     'b/a',
@@ -207,10 +218,10 @@ test('readdir recursive w/fs', async t => {
 })
 
 test('readSize', async t => {
-  var archive1 = await tutil.createArchive([
+  var archive1 = await tutil.createArchive(daemon, [
     'a'
   ])
-  var archive2 = await tutil.createArchive([
+  var archive2 = await tutil.createArchive(daemon, [
     'a',
     'b/',
     'b/a',
@@ -236,10 +247,10 @@ test('readSize', async t => {
 })
 
 test('readSize w/fs', async t => {
-  var fs1 = await tutil.createArchive([
+  var fs1 = await tutil.createArchive(daemon, [
     'a'
   ])
-  var fs2 = await tutil.createArchive([
+  var fs2 = await tutil.createArchive(daemon, [
     'a',
     'b/',
     'b/a',

@@ -2,9 +2,17 @@ const test = require('ava')
 const tutil = require('./util')
 const pda = require('../index')
 
+var daemon
+
+test.before(async () => {
+  daemon = await tutil.createOneDaemon()
+})
+test.after(async () => {
+  await daemon.cleanup()
+})
+
 test('read/write/update manifest', async t => {
-  var archive = await tutil.createArchive([])
-  await new Promise(resolve => archive.ready(resolve))
+  var archive = await tutil.createArchive(daemon, [])
 
   await pda.writeManifest(archive, {
     url: `dat://${tutil.FAKE_DAT_KEY}`,
