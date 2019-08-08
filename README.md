@@ -1,8 +1,7 @@
-# pauls-dat-api
+# pauls-dat-api2
 
-A library of functions that make working with [dat](https://github.com/datproject/dat-node) / [hyperdrive](https://github.com/mafintosh/hyperdrive) easier.
-Includes common operations, and some sugars.
-These functions were factored out of [beaker browser](https://github.com/beakerbrowser/beaker)'s internal APIs.
+The internal implementation for [Beaker](https://github.com/beakerbrowser/beaker)'s `DatArchive` APIs.
+Works with Dat 2.0.
 
 All async methods work with callbacks and promises. If no callback is provided, a promise will be returned.
 
@@ -19,12 +18,7 @@ await pda.readFile(archive, '/hello.txt') // read the published hello.txt
 await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 ```
 
-** NOTE: this library is written natively for node 7 and above. **
-
-To use with node versions lesser than 7 use:
-```js
-var pda = require('pauls-dat-api/es5');
-```
+** NOTE: this library is written natively for node 12 and above. **
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
