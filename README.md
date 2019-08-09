@@ -38,6 +38,10 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 - [Delete](#delete)
   - [unlink(archive, name[, cb])](#unlinkarchive-name-cb)
   - [rmdir(archive, name[, opts, cb])](#rmdirarchive-name-opts-cb)
+- [Mounts](#mounts)
+  - [mount(archive, name, opts[, cb])](#mountarchive-name-opts-cb)
+  - [unmount(archive, name[, cb])](#unmountarchive-name-cb)
+  - [rmdir(archive, name[, opts, cb])](#rmdirarchive-name-opts-cb-1)
 - [Network](#network)
   - [download(archive, name[, cb])](#downloadarchive-name-cb)
 - [Activity Streams](#activity-streams)
@@ -212,6 +216,41 @@ await pda.rename(archive, '/stuff', '/things')
 
 ```js
 await pda.unlink(archive, '/hello.txt')
+```
+
+### rmdir(archive, name[, opts, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `name` Entry path (string).
+ - `opts.recursive` Delete all subfolders and files if the directory is not empty.
+ - Throws ArchiveNotWritableError, NotFoundError, NotAFolderError, DestDirectoryNotEmpty
+
+```js
+await pda.rmdir(archive, '/stuff', {recursive: true})
+```
+
+## Mounts
+
+### mount(archive, name, opts[, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `name` Entry path (string).
+ - `opts`. Options (object|string). If a string or buffer, will act as `opts.key`.
+ - `opts.key` Key of archive to mount. May be a hex string or Buffer.
+ - Throws ArchiveNotWritableError, InvalidPathError, ParentFolderDoesntExistError
+
+```js
+await pda.mount(archive, '/foo', archive2.key)
+```
+
+### unmount(archive, name[, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `name` Entry path (string).
+ - Throws ArchiveNotWritableError, InvalidPathError, NotFoundError
+
+```js
+await pda.unmount(archive, '/foo')
 ```
 
 ### rmdir(archive, name[, opts, cb])
