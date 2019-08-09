@@ -63,6 +63,40 @@ test('mkdir w/fs', async t => {
   t.deepEqual((await pda.stat(fs, '/bar')).isDirectory(), true)
 })
 
+test('symlink', async t => {
+  var archive = await tutil.createArchive(daemon, [
+    'foo',
+    'bar/',
+    'bar/one',
+    'bar/two'
+  ])
+
+  await pda.symlink(archive, '/foo', '/foo2')
+  await pda.symlink(archive, '/bar', '/bar2')
+  t.deepEqual((await pda.readdir(archive, '/bar2')).sort(), ['one', 'two'].sort())
+  t.deepEqual((await pda.stat(archive, '/bar2')).isDirectory(), true)
+  // t.deepEqual((await pda.stat(archive, '/bar2')).isSymbolicLink(), true) TODO
+  t.deepEqual((await pda.readFile(archive, '/foo2')), 'content')
+  t.deepEqual((await pda.stat(archive, '/foo2')).isFile(), true)
+  // t.deepEqual((await pda.stat(archive, '/foo2')).isSymbolicLink(), true) TODO
+})
+
+test('symlink w/fs', async t => {
+  var fs = await tutil.createFs([
+    'foo',
+    'bar/',
+    'bar/one',
+    'bar/two'
+  ])
+
+  await pda.symlink(fs, '/foo', '/foo2')
+  await pda.symlink(fs, '/bar', '/bar2')
+  t.deepEqual((await pda.readdir(fs, '/bar2')).sort(), ['one', 'two'].sort())
+  t.deepEqual((await pda.stat(fs, '/bar2')).isDirectory(), true)
+  t.deepEqual((await pda.readFile(fs, '/foo2')), 'content')
+  t.deepEqual((await pda.stat(fs, '/foo2')).isFile(), true)
+})
+
 test('copy', async t => {
   var archive = await tutil.createArchive(daemon, [
     {name: 'a', content: 'thecopy'},

@@ -33,6 +33,7 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 - [Write](#write)
   - [writeFile(archive, name, data[, opts, cb])](#writefilearchive-name-data-opts-cb)
   - [mkdir(archive, name[, cb])](#mkdirarchive-name-cb)
+  - [symlink(archive, target, linkname[, cb])](#symlinkarchive-target-linkname-cb)
   - [copy(archive, sourceName, targetName[, cb])](#copyarchive-sourcename-targetname-cb)
   - [rename(archive, sourceName, targetName[, cb])](#renamearchive-sourcename-targetname-cb)
 - [Delete](#delete)
@@ -174,6 +175,17 @@ await pda.writeFile(archive, '/profile.png', fs.readFileSync('/tmp/dog.png'))
 
 ```js
 await pda.mkdir(archive, '/stuff')
+```
+
+### symlink(archive, target, linkname[, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `target` Path to symlink to (string).
+ - `linkname` Path to create the symlink (string).
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
+
+```js
+await pda.symlink(archive, '/hello.txt', '/goodbye.txt')
 ```
 
 ### copy(archive, sourceName, targetName[, cb])
