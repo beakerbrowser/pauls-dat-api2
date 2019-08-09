@@ -60,8 +60,6 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 - [Diff/Merge](#diffmerge)
   - [diff(srcArchive, srcPath, dstArchive, dstPath[, opts, cb])](#diffsrcarchive-srcpath-dstarchive-dstpath-opts-cb)
   - [merge(srcArchive, srcPath, dstArchive, dstPath[, opts, cb])](#mergesrcarchive-srcpath-dstarchive-dstpath-opts-cb)
-- [Helpers](#helpers)
-  - [findEntryByContentBlock(archive, block)](#findentrybycontentblockarchive-block)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -299,26 +297,18 @@ await pda.download(archive, '/')
 ### watch(archive[, path])
 
  - `archive` Hyperdrive archive (object).
- - `path` Entry path (string) or [anymatch](npm.im/anymatch) pattern (array of strings). If falsy, will watch all files.
+ - `path` Prefix path. If falsy, will watch all files.
  - Returns a Readable stream.
 
-Watches the given path or path-pattern for file events, which it emits as an [emit-stream](https://github.com/substack/emit-stream). Supported events:
+Watches the given path for file events, which it emits as an [emit-stream](https://github.com/substack/emit-stream). Supported events:
 
- - `['invalidated',{path}]` - The contents of the file has changed, but may not have been downloaded yet. `path` is the path-string of the file.
- - `['changed',{path}]` - The contents of the file has changed, and the new version is ready to read. `path` is the path-string of the file.
-
-An archive will emit "invalidated" first, when it receives the new metadata for the file. It will then emit "changed" when the content arrives. (A local archive will emit "invalidated" immediately before "changed.")
+ - `['changed',{path}]` - The contents of the file has changed. `path` is the path-string of the file.
 
 ```js
-var es = pda.watch(archive)
 var es = pda.watch(archive, 'foo.txt')
-var es = pda.watch(archive, ['**/*.txt', '**/*.md'])
 
 es.on('data', ([event, args]) => {
-  if (event === 'invalidated') {
-    console.log(args.path, 'has been invalidated')
-    pda.download(archive, args.path)
-  } else if (event === 'changed') {
+  if (event === 'changed') {
     console.log(args.path, 'has changed')
   }
 })
@@ -327,10 +317,6 @@ es.on('data', ([event, args]) => {
 
 var emitStream = require('emit-stream')
 var events = emitStream(pda.watch(archive))
-events.on('invalidated', args => {
-  console.log(args.path, 'has been invalidated')
-  pda.download(archive, args.path)
-})
 events.on('changed', args => {
   console.log(args.path, 'has changed')
 })
@@ -596,23 +582,4 @@ Output looks like:
   {change: 'del', type: 'dir',  path: '/backup'},
   {change: 'del', type: 'file', path: '/hello.txt'},
 ]
-```
-
-## Helpers
-
-### findEntryByContentBlock(archive, block)
-
- - `archive` Hyperdrive archive (object).
- - `block` Content-block index
- - Returns a Promise for `{name:, start:, end:}`
-
-Runs a binary search to find the file-entry that the given content-block index belongs to.
-
-```js
-await pda.findEntryByContentBlock(archive, 5)
-/* => {
-  name: '/foo.txt',
-  start: 4,
-  end: 6
-}*/
 ```
