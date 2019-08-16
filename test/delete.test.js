@@ -27,7 +27,7 @@ test('unlink', async t => {
   await t.throws(pda.stat(archive, 'b/a'))
   await pda.unlink(archive, '/c/b/a')
   await t.throws(pda.stat(archive, '/c/b/a'))
-  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).sort().map(tutil.tonix), ['.key', 'b', 'c', 'c/b'].sort())
+  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).sort().map(tutil.tonix), ['b', 'c', 'c/b'].sort())
 })
 
 test('unlink NotFoundError, NotAFileError', async t => {
@@ -58,7 +58,7 @@ test('rmdir', async t => {
   await pda.rmdir(archive, 'b/a')
   await pda.rmdir(archive, 'b')
   await pda.rmdir(archive, 'c/b')
-  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).sort(), ['.key', 'a', 'c'].sort())
+  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).sort(), ['a', 'c'].sort())
 })
 
 test('rmdir recursive', async t => {
@@ -80,7 +80,7 @@ test('rmdir recursive', async t => {
   ])
 
   await pda.rmdir(archive, 'b', {recursive: true})
-  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).map(tutil.tonix).sort(), ['.key', 'a', 'c', 'c/b'].sort())
+  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).map(tutil.tonix).sort(), ['a', 'c', 'c/b'].sort())
 })
 
 test('rmdir NotFoundError, NotAFolderError, DestDirectoryNotEmpty', async t => {

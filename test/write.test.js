@@ -49,7 +49,7 @@ test('mkdir', async t => {
   ])
 
   await pda.mkdir(archive, '/bar')
-  t.deepEqual((await pda.readdir(archive, '/')).sort(), ['.key', 'bar', 'foo'].sort())
+  t.deepEqual((await pda.readdir(archive, '/')).sort(), ['bar', 'foo'].sort())
   t.deepEqual((await pda.stat(archive, '/bar')).isDirectory(), true)
 })
 

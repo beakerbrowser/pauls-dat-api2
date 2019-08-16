@@ -18,12 +18,10 @@ test('mount and unmount', async t => {
   ])
 
   await pda.mount(archive1, '/foo', archive2.key)
-  t.deepEqual((await pda.readdir(archive1, '/')).sort(), ['.key', 'foo'].sort())
-  t.deepEqual((await pda.readdir(archive1, '/foo')).sort(), ['.key', 'bar'].sort())
+  t.deepEqual((await pda.readdir(archive1, '/')).sort(), ['foo'].sort())
+  t.deepEqual((await pda.readdir(archive1, '/foo')).sort(), ['bar'].sort())
   t.deepEqual((await pda.readdir(archive1, '/', {recursive: true})).sort(), [
-    ".key",
     "foo",
-    "foo/.key",
     "foo/bar"
   ].sort())
   t.deepEqual((await pda.stat(archive1, '/foo')).isDirectory(), true)
@@ -31,11 +29,10 @@ test('mount and unmount', async t => {
   t.deepEqual(await pda.readFile(archive1, '/foo/hello.txt', 'utf8'), 'hello')
 
   await pda.unmount(archive1, '/foo')
-  t.deepEqual((await pda.readdir(archive1, '/')).sort(), ['.key'].sort())
+  t.deepEqual((await pda.readdir(archive1, '/')).sort(), [])
 })
 
-// TODO
-/*test('mount at version', async t => {
+test('mount at version', async t => {
   var archive1 = await tutil.createArchive(daemon, [])
   var archive2 = await tutil.createArchive(daemon, [
     'bar'
@@ -44,9 +41,11 @@ test('mount and unmount', async t => {
   pda.writeFile(archive2, '/test.txt', '1')
   pda.writeFile(archive2, '/test.txt', '2')
 
-  await pda.mount(archive1, '/foo', {key: archive2.key, version: 2})
+  await pda.mount(archive1, '/foo', {key: archive2.key, version: 3})
   t.deepEqual(await pda.readFile(archive1, '/foo/test.txt', 'utf8'), '1')
-})*/
+  await pda.mount(archive1, '/foo2', {key: archive2.key, version: 4})
+  t.deepEqual(await pda.readFile(archive1, '/foo2/test.txt', 'utf8'), '2')
+})
 
 test('EntryAlreadyExistsError', async t => {
   var archive = await tutil.createArchive(daemon, [])

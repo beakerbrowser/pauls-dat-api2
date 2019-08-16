@@ -35,8 +35,8 @@
   "devDependencies": {
     "@hyperswarm/dht": "^1.0.1",
     "ava": "^0.18.1",
-    "hyperdrive-daemon": "^0.9.16",
-    "hyperdrive-daemon-client": "^0.10.2",
+    "hyperdrive-daemon": "^0.10.0",
+    "hyperdrive-daemon-client": "^0.11.0",
     "scoped-fs": "^1.4.1",
     "tmp-promise": "^2.0.2"
   }

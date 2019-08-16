@@ -103,8 +103,8 @@ test('readdir', async t => {
     'baz'
   ])
 
-  t.deepEqual((await pda.readdir(archive, '')).sort(), ['.key', 'foo', 'baz'].sort())
-  t.deepEqual((await pda.readdir(archive, '/')).sort(), ['.key', 'foo', 'baz'].sort())
+  t.deepEqual((await pda.readdir(archive, '')).sort(), ['foo', 'baz'].sort())
+  t.deepEqual((await pda.readdir(archive, '/')).sort(), ['foo', 'baz'].sort())
   t.deepEqual(await pda.readdir(archive, 'foo'), ['bar'])
   t.deepEqual(await pda.readdir(archive, '/foo'), ['bar'])
   t.deepEqual(await pda.readdir(archive, '/foo/'), ['bar'])
@@ -139,7 +139,6 @@ test('readdir recursive', async t => {
   ])
 
   t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).map(tutil.tonix).sort(), [
-    '.key',
     'a',
     'b',
     'b/a',
