@@ -2,6 +2,8 @@ const test = require('ava')
 const {NotFoundError, NotAFileError} = require('beaker-error-constants')
 const tutil = require('./util')
 const pda = require('../index')
+const pump = require('pump')
+const concat = require('concat-stream')
 
 var daemon
 var target
@@ -24,6 +26,22 @@ async function readTest (t, path, expected, errorTests) {
 }
 readTest.title = (_, path) => `readFile(${path}) test`
 
+async function createReadStreamTest (t, path, expected, errorTests) {
+  try {
+    var stream = await pda.createReadStream(target, path)
+    var data = await new Promise((resolve, reject) => {
+      pump(stream, concat({encoding: 'buffer'}, resolve), reject)
+    })
+    if (!Buffer.isBuffer(expected)) {
+      data = data.toString('utf-8')
+    }
+    t.deepEqual(data, expected)
+  } catch (e) {
+    if (errorTests) errorTests(t, e)
+    else throw e
+  }
+}
+createReadStreamTest.title = (_, path) => `createReadStreamTest(${path}) test`
 
 test('create archive', async t => {
   target = await tutil.createArchive(daemon, [
@@ -272,6 +290,57 @@ test('readSize w/fs', async t => {
   var size3 = await pda.readSize(fs2, '/b')
 
   t.truthy(size3 > 0)
+})
+
+test('create archive', async t => {
+  target = await tutil.createArchive(daemon, [
+    'foo',
+    'foo2/',
+    'foo2/bar',
+    { name: 'baz', content: Buffer.from([0x00, 0x01, 0x02, 0x03]) },
+    'dir/'
+  ])
+})
+
+test(createReadStreamTest, 'foo', 'content')
+test(createReadStreamTest, '/foo', 'content')
+test(createReadStreamTest, 'foo2/bar', 'content')
+test(createReadStreamTest, '/foo2/bar', 'content')
+test(createReadStreamTest, 'baz', Buffer.from([0x00, 0x01, 0x02, 0x03]))
+test(createReadStreamTest, '/baz', Buffer.from([0x00, 0x01, 0x02, 0x03]))
+test(createReadStreamTest, 'doesnotexist', null, (t, err) => {
+  t.truthy(err instanceof NotFoundError)
+  t.truthy(err.notFound)
+})
+test(createReadStreamTest, 'dir/', null, (t, err) => {
+  t.truthy(err instanceof NotAFileError)
+  t.truthy(err.notAFile)
+})
+
+createReadStreamTest.title = (_, path) => `createReadStream(${path}) test (w/fs)`
+test('create archive w/fs', async t => {
+  target = await tutil.createFs([
+    'foo',
+    'foo2/',
+    'foo2/bar',
+    { name: 'baz', content: Buffer.from([0x00, 0x01, 0x02, 0x03]) },
+    'dir/'
+  ])
+})
+
+test(createReadStreamTest, 'foo', 'content')
+test(createReadStreamTest, '/foo', 'content')
+test(createReadStreamTest, 'foo2/bar', 'content')
+test(createReadStreamTest, '/foo2/bar', 'content')
+test(createReadStreamTest, 'baz', Buffer.from([0x00, 0x01, 0x02, 0x03]))
+test(createReadStreamTest, '/baz', Buffer.from([0x00, 0x01, 0x02, 0x03]))
+test(createReadStreamTest, 'doesnotexist', null, (t, err) => {
+  t.truthy(err instanceof NotFoundError)
+  t.truthy(err.notFound)
+})
+test(createReadStreamTest, 'dir/', null, (t, err) => {
+  t.truthy(err instanceof NotAFileError)
+  t.truthy(err.notAFile)
 })
 
 

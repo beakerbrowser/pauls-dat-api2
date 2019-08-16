@@ -31,12 +31,14 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
   - [readFile(archive, name[, opts, cb])](#readfilearchive-name-opts-cb)
   - [readdir(archive, path[, opts, cb])](#readdirarchive-path-opts-cb)
   - [readSize(archive, path[, cb])](#readsizearchive-path-cb)
+  - [createReadStream(archive, name[, opts, cb])](#createreadstreamarchive-name-opts-cb)
 - [Write](#write)
   - [writeFile(archive, name, data[, opts, cb])](#writefilearchive-name-data-opts-cb)
   - [mkdir(archive, name[, cb])](#mkdirarchive-name-cb)
   - [symlink(archive, target, linkname[, cb])](#symlinkarchive-target-linkname-cb)
   - [copy(archive, sourceName, targetName[, cb])](#copyarchive-sourcename-targetname-cb)
   - [rename(archive, sourceName, targetName[, cb])](#renamearchive-sourcename-targetname-cb)
+  - [createWriteStream(archive, name[, cb])](#createwritestreamarchive-name-cb)
 - [Delete](#delete)
   - [unlink(archive, name[, cb])](#unlinkarchive-name-cb)
   - [rmdir(archive, name[, opts, cb])](#rmdirarchive-name-opts-cb)
@@ -163,6 +165,26 @@ var size = await pda.readSize(archive, '/assets')
 console.log(size) // => 123
 ```
 
+### createReadStream(archive, name[, opts, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `name` Entry path (string).
+ - `opts`. Options (object|string). If a string, will act as `opts.encoding`.
+ - `opts.start` Starting offset (number). Default 0.
+ - `opts.end`. Ending offset inclusive (number). Default undefined.
+ - `opts.length`. How many bytes to read (number). Default undefined.
+ - Returns the content of the file.
+ - Throws NotFoundError, NotAFileError.
+
+```js
+await pda.createReadStream(archive, '/favicon.png')
+await pda.createReadStream(archive, '/favicon.png', {
+  start: 1,
+  end: 3
+})
+```
+
+
 ## Write
 
 ### writeFile(archive, name, data[, opts, cb])
@@ -228,6 +250,16 @@ This is equivalent to moving a file/folder.
 await pda.rename(archive, '/foo.txt', '/foo.md')
 // move folder:
 await pda.rename(archive, '/stuff', '/things')
+```
+
+### createWriteStream(archive, name[, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `name` Entry path (string).
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError.
+
+```js
+await pda.createWriteStream(archive, '/hello.txt')
 ```
 
 ## Delete
