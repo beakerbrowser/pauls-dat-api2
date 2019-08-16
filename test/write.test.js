@@ -75,10 +75,10 @@ test('symlink', async t => {
   await pda.symlink(archive, '/bar', '/bar2')
   t.deepEqual((await pda.readdir(archive, '/bar2')).sort(), ['one', 'two'].sort())
   t.deepEqual((await pda.stat(archive, '/bar2')).isDirectory(), true)
-  // t.deepEqual((await pda.stat(archive, '/bar2')).isSymbolicLink(), true) TODO
+  t.deepEqual((await pda.lstat(archive, '/bar2')).isSymbolicLink(), true)
   t.deepEqual((await pda.readFile(archive, '/foo2')), 'content')
   t.deepEqual((await pda.stat(archive, '/foo2')).isFile(), true)
-  // t.deepEqual((await pda.stat(archive, '/foo2')).isSymbolicLink(), true) TODO
+  t.deepEqual((await pda.lstat(archive, '/foo2')).isSymbolicLink(), true)
 })
 
 test('symlink w/fs', async t => {

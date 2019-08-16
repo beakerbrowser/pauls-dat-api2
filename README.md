@@ -26,6 +26,7 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 
 - [Lookup](#lookup)
   - [stat(archive, name[, cb])](#statarchive-name-cb)
+  - [lstat(archive, name[, cb])](#lstatarchive-name-cb)
 - [Read](#read)
   - [readFile(archive, name[, opts, cb])](#readfilearchive-name-opts-cb)
   - [readdir(archive, path[, opts, cb])](#readdirarchive-path-opts-cb)
@@ -98,6 +99,19 @@ Stat {
   mtime: 2017-04-10T18:59:00.147Z,
   ctime: 2017-04-10T18:59:00.147Z,
   linkname: undefined } */
+```
+
+### lstat(archive, name[, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `name` Entry name (string).
+ - Returns a Hyperdrive Stat entry (object).
+ - Throws NotFoundError
+
+```js
+// by name:
+var st = await pda.lstat(archive, '/dat.json')
+st.isSymbolicLink()
 ```
 
 ## Read
