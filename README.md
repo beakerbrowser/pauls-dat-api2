@@ -45,7 +45,6 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 - [Mounts](#mounts)
   - [mount(archive, name, opts[, cb])](#mountarchive-name-opts-cb)
   - [unmount(archive, name[, cb])](#unmountarchive-name-cb)
-  - [rmdir(archive, name[, opts, cb])](#rmdirarchive-name-opts-cb-1)
 - [Network](#network)
   - [download(archive, name[, cb])](#downloadarchive-name-cb)
 - [Activity Streams](#activity-streams)
@@ -307,17 +306,6 @@ await pda.mount(archive, '/foo', archive2.key)
 
 ```js
 await pda.unmount(archive, '/foo')
-```
-
-### rmdir(archive, name[, opts, cb])
-
- - `archive` Hyperdrive archive (object).
- - `name` Entry path (string).
- - `opts.recursive` Delete all subfolders and files if the directory is not empty.
- - Throws ArchiveNotWritableError, NotFoundError, NotAFolderError, DestDirectoryNotEmpty
-
-```js
-await pda.rmdir(archive, '/stuff', {recursive: true})
 ```
 
 ## Network
