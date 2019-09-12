@@ -26,7 +26,7 @@ test('read/write/update manifest', async t => {
   t.deepEqual(await pda.readManifest(archive), {
     title: 'My Dat',
     description: 'This dat has a manifest!',
-    type: ['foo', 'bar'],
+    type: 'foo bar',
     links: {repository: [{href: 'https://github.com/pfrazee/pauls-dat-api.git'}]},
     url: `dat://${tutil.FAKE_DAT_KEY}`,
     author: 'dat://ffffffffffffffffffffffffffffffff'
@@ -40,7 +40,7 @@ test('read/write/update manifest', async t => {
   t.deepEqual(await pda.readManifest(archive), {
     title: 'My Dat!!',
     description: 'This dat has a manifest!',
-    type: ['foo'],
+    type: 'foo',
     links: {repository: [{href: 'https://github.com/pfrazee/pauls-dat-api.git'}]},
     url: `dat://${tutil.FAKE_DAT_KEY}`,
     author: 'dat://ffffffffffffffffffffffffffffffff'
@@ -53,7 +53,7 @@ test('read/write/update manifest', async t => {
   t.deepEqual(await pda.readManifest(archive), {
     title: 'My Dat!!',
     description: 'This dat has a manifest!',
-    type: ['foo'],
+    type: 'foo',
     links: {repository: [{href: 'https://github.com/pfrazee/pauls-dat-api.git'}]},
     url: `dat://${tutil.FAKE_DAT_KEY}`,
     author: 'dat://foo.com'
@@ -69,7 +69,7 @@ test('read/write/update manifest', async t => {
   t.deepEqual(await pda.readManifest(archive), {
     title: 'My Dat!!',
     description: 'This dat has a manifest!',
-    type: ['foo'],
+    type: 'foo',
     links: {repository: [{href: 'https://github.com/pfrazee/pauls-dat-api.git'}]},
     url: `dat://${tutil.FAKE_DAT_KEY}`,
     author: 'dat://foo.com',
