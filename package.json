@@ -31,15 +31,15 @@
     "emit-stream": "^0.1.2",
     "fs-extra": "^4.0.3",
     "pump": "^1.0.3",
-    "streamx": "^2.0.1"
+    "streamx": "^2.5.0"
   },
   "devDependencies": {
     "@hyperswarm/dht": "^1.0.1",
     "ava": "^0.18.1",
     "concat-stream": "^2.0.0",
-    "hyperdrive-daemon": "^0.10.0",
-    "hyperdrive-daemon-client": "^0.11.0",
-    "into-stream": "^5.1.0",
+    "hyperdrive-daemon": "git://github.com/andrewosh/hyperdrive-daemon.git#hypercore-8",
+    "hyperdrive-daemon-client": "^0.14.0",
+    "into-stream": "^5.1.1",
     "scoped-fs": "^1.4.1",
     "tmp-promise": "^2.0.2"
   }

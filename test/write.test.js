@@ -391,8 +391,8 @@ test('ParentFolderDoesntExistError w/fs', async t => {
   t.truthy(err6.parentFolderDoesntExist)
 })
 
-async function doWriteStream (archive, path, data) {
-  var ws = await pda.createWriteStream(archive, path)
+async function doWriteStream (archive, path, data, opts) {
+  var ws = await pda.createWriteStream(archive, path, opts)
   return new Promise((resolve, reject) => 
     pump(
       intoStream(data),
@@ -427,4 +427,45 @@ test('createWriteStream w/fs', async t => {
   t.deepEqual(await pda.readFile(fs, 'foo'), 'new content')
   await doWriteStream(fs, 'foo', Buffer.from([0x01]))
   t.deepEqual(await pda.readFile(fs, 'foo', 'buffer'), Buffer.from([0x01]))
+})
+
+test('read/write metadata', async t => {
+  var archive = await tutil.createArchive(daemon, [])
+
+  await pda.writeFile(archive, '/foo', 'new content')
+  await pda.updateMetadata(archive, '/foo', {foo: 'bar'})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {foo: 'bar'})
+  await pda.updateMetadata(archive, '/foo', {foo: 'baz'})
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {foo: 'baz'})
+  await pda.updateMetadata(archive, '/foo', {stuff: 'hey', cool: 'things'})
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {foo: 'baz', stuff: 'hey', cool: 'things'})
+  await pda.deleteMetadata(archive, '/foo', 'foo')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {stuff: 'hey', cool: 'things'})
+  await pda.deleteMetadata(archive, '/foo', ['stuff', 'other'])
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {cool: 'things'})
+})
+
+test('write metadata with file-write', async t => {
+  var archive = await tutil.createArchive(daemon, [])
+
+  await doWriteStream(archive, '/foo', 'new content', {metadata: {foo: 'bar'}})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {foo: 'bar'})
+  await doWriteStream(archive, '/foo', 'new content', {metadata: {foo: 'baz', stuff: undefined}})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {foo: 'baz'})
+  await doWriteStream(archive, '/foo', 'new content', {metadata: {stuff: 'hey', cool: 'things'}})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {stuff: 'hey', cool: 'things'})
+
+  await pda.writeFile(archive, '/foo', 'new content', {metadata: {foo: 'bar'}})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {foo: 'bar'})
+  await pda.writeFile(archive, '/foo', 'new content', {metadata: {foo: 'baz'}})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {foo: 'baz'})
+  await pda.writeFile(archive, '/foo', 'new content', {metadata: {stuff: 'hey', cool: 'things'}})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {stuff: 'hey', cool: 'things'})
 })

@@ -251,6 +251,28 @@ await pda.rename(archive, '/foo.txt', '/foo.md')
 await pda.rename(archive, '/stuff', '/things')
 ```
 
+### updateMetadata(archive, path, metadata[, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `path` Entry path (string).
+ - `metadata` Metadata values to set (object).
+
+Updates the file/folder metadata. Does not overwrite all values; any existing metadata keys which are not specified in the `metadata` param are preserved.
+
+```js
+await pda.updateMetadata(archive, '/hello.txt', {foo: 'bar'})
+```
+
+### deleteMetadata(archive, path, keys[, cb])
+
+ - `archive` Hyperdrive archive (object).
+ - `path` Entry path (string).
+ - `keys` Metadata keys to delete (string | string[]).
+
+```js
+await pda.deleteMetadata(archive, '/hello.txt', ['foo'])
+```
+
 ### createWriteStream(archive, name[, cb])
 
  - `archive` Hyperdrive archive (object).
