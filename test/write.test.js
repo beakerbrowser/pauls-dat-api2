@@ -446,7 +446,16 @@ test('read/write metadata', async t => {
   t.deepEqual((await pda.stat(archive, 'foo')).metadata, {cool: 'things'})
 })
 
-test('write metadata with file-write', async t => {
+test('binary metadata', async t => {
+  var archive = await tutil.createArchive(daemon, [])
+
+  await pda.writeFile(archive, '/foo', 'new content')
+  await pda.updateMetadata(archive, '/foo', {'bin:foo': Buffer.from([1,2,3,4])})
+  t.deepEqual(await pda.readFile(archive, 'foo'), 'new content')
+  t.deepEqual((await pda.stat(archive, 'foo')).metadata, {'bin:foo': Buffer.from([1,2,3,4])})
+})
+
+test.skip('write metadata with file-write', async t => {
   var archive = await tutil.createArchive(daemon, [])
 
   await doWriteStream(archive, '/foo', 'new content', {metadata: {foo: 'bar'}})

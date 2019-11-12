@@ -263,6 +263,13 @@ Updates the file/folder metadata. Does not overwrite all values; any existing me
 await pda.updateMetadata(archive, '/hello.txt', {foo: 'bar'})
 ```
 
+The default encoding for metadata attributes is utf8. Attributes which start with `bin:` are encoded in binary.
+
+```js
+await pda.updateMetadata(archive, '/hello.txt', {'bin:foo': Buffer.from([1,2,3,4]})
+(await pda.stat(archive, '/hello.txt')).metadata['bin:foo'] //=> Buffer([1,2,3,4])
+```
+
 ### deleteMetadata(archive, path, keys[, cb])
 
  - `archive` Hyperdrive archive (object).
