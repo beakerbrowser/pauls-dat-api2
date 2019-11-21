@@ -188,6 +188,27 @@ test('readdir recursive', async t => {
   ])
 })
 
+test('readdir recursive does not descend into mounts', async t => {
+  var archive = await tutil.createArchive(daemon, [
+    'a',
+    'b/',
+    'b/a'
+  ])
+  var mount = await tutil.createArchive(daemon, [
+    'hi',
+    'dont',
+    'show',
+    'pls'
+  ])
+  await pda.mount(archive, '/mount', mount.key)
+  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).map(tutil.tonix).sort(), [
+    'a',
+    'b',
+    'b/a',
+    'mount'
+  ])
+})
+
 test('readdir recursive w/fs', async t => {
   var fs = await tutil.createFs([
     'a',
