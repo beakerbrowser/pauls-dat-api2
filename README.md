@@ -36,8 +36,10 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
   - [writeFile(archive, name, data[, opts, cb])](#writefilearchive-name-data-opts-cb)
   - [mkdir(archive, name[, cb])](#mkdirarchive-name-cb)
   - [symlink(archive, target, linkname[, cb])](#symlinkarchive-target-linkname-cb)
-  - [copy(archive, sourceName, targetName[, cb])](#copyarchive-sourcename-targetname-cb)
-  - [rename(archive, sourceName, targetName[, cb])](#renamearchive-sourcename-targetname-cb)
+  - [copy(srcArchive, srcName, dstArchive, dstName[, cb])](#copysrcarchive-srcname-dstarchive-dstname-cb)
+  - [rename(srcArchive, srcName, dstName[, cb])](#renamesrcarchive-srcname-dstname-cb)
+  - [updateMetadata(archive, path, metadata[, cb])](#updatemetadataarchive-path-metadata-cb)
+  - [deleteMetadata(archive, path, keys[, cb])](#deletemetadataarchive-path-keys-cb)
   - [createWriteStream(archive, name[, cb])](#createwritestreamarchive-name-cb)
 - [Delete](#delete)
   - [unlink(archive, name[, cb])](#unlinkarchive-name-cb)
@@ -221,34 +223,36 @@ await pda.mkdir(archive, '/stuff')
 await pda.symlink(archive, '/hello.txt', '/goodbye.txt')
 ```
 
-### copy(archive, sourceName, targetName[, cb])
+### copy(srcArchive, srcName, dstArchive, dstName[, cb])
 
- - `archive` Hyperdrive archive (object).
- - `sourceName` Path to file or directory to copy (string).
- - `targetName` Where to copy the file or folder to (string).
+ - `srcArchive` Source Hyperdrive archive (object).
+ - `srcName` Path to file or directory to copy (string).
+ - `dstArchive` Destination Hyperdrive archive (object).
+ - `dstName` Where to copy the file or folder to (string).
  - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
 
 ```js
 // copy file:
-await pda.copy(archive, '/foo.txt', '/foo.txt.back')
+await pda.copy(archive, '/foo.txt', archive, '/foo.txt.back')
 // copy folder:
-await pda.copy(archive, '/stuff', '/stuff-copy')
+await pda.copy(archive, '/stuff', otherArchive, '/stuff')
 ```
 
-### rename(archive, sourceName, targetName[, cb])
+### rename(srcArchive, srcName, dstName[, cb])
 
- - `archive` Hyperdrive archive (object).
- - `sourceName` Path to file or directory to rename (string).
- - `targetName` What the file or folder should be named (string).
+ - `srcArchive` Source Hyperdrive archive (object).
+ - `srcName` Path to file or directory to rename (string).
+ - `dstArchive` Destination Hyperdrive archive (object).
+ - `dstName` What the file or folder should be named (string).
  - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
 
 This is equivalent to moving a file/folder.
 
 ```js
 // move file:
-await pda.rename(archive, '/foo.txt', '/foo.md')
+await pda.rename(archive, '/foo.txt', archive, '/foo.md')
 // move folder:
-await pda.rename(archive, '/stuff', '/things')
+await pda.rename(archive, '/stuff', otherArchive, '/stuff')
 ```
 
 ### updateMetadata(archive, path, metadata[, cb])

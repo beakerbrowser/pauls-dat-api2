@@ -112,11 +112,11 @@ test('copy', async t => {
     'c/'
   ])
 
-  await pda.copy(archive, '/a', '/a-copy')
+  await pda.copy(archive, '/a', archive, '/a-copy')
   t.deepEqual(await pda.readFile(archive, '/a-copy'), 'thecopy')
   t.deepEqual((await pda.stat(archive, '/a-copy')).isFile(), true)
 
-  await pda.copy(archive, '/b', '/b-copy')
+  await pda.copy(archive, '/b', archive, '/b-copy')
   t.deepEqual((await pda.stat(archive, '/b-copy')).isDirectory(), true)
   t.deepEqual(await pda.readFile(archive, '/b-copy/a'), 'content')
   t.deepEqual((await pda.stat(archive, '/b-copy/b')).isDirectory(), true)
@@ -125,17 +125,51 @@ test('copy', async t => {
   t.deepEqual(await pda.readFile(archive, '/b-copy/b/c'), 'content')
   t.deepEqual(await pda.readFile(archive, '/b-copy/c'), 'content')
 
-  await pda.copy(archive, '/b/b', '/c')
+  await pda.copy(archive, '/b/b', archive, '/c')
   t.deepEqual((await pda.stat(archive, '/c')).isDirectory(), true)
   t.deepEqual(await pda.readFile(archive, 'c/a'), 'content')
   t.deepEqual(await pda.readFile(archive, 'c/b'), 'content')
   t.deepEqual(await pda.readFile(archive, 'c/c'), 'content')
 
-  const err1 = await t.throws(pda.copy(archive, '/b', '/b/sub'))
+  const err1 = await t.throws(pda.copy(archive, '/b', archive, '/b/sub'))
   t.truthy(err1.invalidPath)
 
-  const err2 = await t.throws(pda.copy(archive, '/b', '/b'))
+  const err2 = await t.throws(pda.copy(archive, '/b', archive, '/b'))
   t.truthy(err2.invalidPath)
+})
+
+test('copy between archives', async t => {
+  var archive1 = await tutil.createArchive(daemon, [
+    {name: 'a', content: 'thecopy'},
+    'b/',
+    'b/a',
+    'b/b/',
+    'b/b/a',
+    'b/b/b',
+    'b/b/c',
+    'b/c',
+    'c/'
+  ])
+  var archive2 = await tutil.createArchive(daemon, [])
+
+  await pda.copy(archive1, '/a', archive2, '/a')
+  t.deepEqual(await pda.readFile(archive2, '/a'), 'thecopy')
+  t.deepEqual((await pda.stat(archive2, '/a')).isFile(), true)
+
+  await pda.copy(archive1, '/b', archive2, '/b')
+  t.deepEqual((await pda.stat(archive2, '/b')).isDirectory(), true)
+  t.deepEqual(await pda.readFile(archive2, '/b/a'), 'content')
+  t.deepEqual((await pda.stat(archive2, '/b/b')).isDirectory(), true)
+  t.deepEqual(await pda.readFile(archive2, '/b/b/a'), 'content')
+  t.deepEqual(await pda.readFile(archive2, '/b/b/b'), 'content')
+  t.deepEqual(await pda.readFile(archive2, '/b/b/c'), 'content')
+  t.deepEqual(await pda.readFile(archive2, '/b/c'), 'content')
+
+  await pda.copy(archive1, '/b/b', archive2, '/c')
+  t.deepEqual((await pda.stat(archive2, '/c')).isDirectory(), true)
+  t.deepEqual(await pda.readFile(archive2, 'c/a'), 'content')
+  t.deepEqual(await pda.readFile(archive2, 'c/b'), 'content')
+  t.deepEqual(await pda.readFile(archive2, 'c/c'), 'content')
 })
 
 test('copy w/fs', async t => {
@@ -151,11 +185,11 @@ test('copy w/fs', async t => {
     'c/'
   ])
 
-  await pda.copy(fs, '/a', '/a-copy')
+  await pda.copy(fs, '/a', fs, '/a-copy')
   t.deepEqual(await pda.readFile(fs, '/a-copy'), 'thecopy')
   t.deepEqual((await pda.stat(fs, '/a-copy')).isFile(), true)
 
-  await pda.copy(fs, '/b', '/b-copy')
+  await pda.copy(fs, '/b', fs, '/b-copy')
   t.deepEqual((await pda.stat(fs, '/b-copy')).isDirectory(), true)
   t.deepEqual(await pda.readFile(fs, '/b-copy/a'), 'content')
   t.deepEqual((await pda.stat(fs, '/b-copy/b')).isDirectory(), true)
@@ -164,12 +198,11 @@ test('copy w/fs', async t => {
   t.deepEqual(await pda.readFile(fs, '/b-copy/b/c'), 'content')
   t.deepEqual(await pda.readFile(fs, '/b-copy/c'), 'content')
 
-  await pda.copy(fs, '/b/b', '/c')
+  await pda.copy(fs, '/b/b', fs, '/c')
   t.deepEqual((await pda.stat(fs, '/c')).isDirectory(), true)
   t.deepEqual(await pda.readFile(fs, 'c/a'), 'content')
   t.deepEqual(await pda.readFile(fs, 'c/b'), 'content')
   t.deepEqual(await pda.readFile(fs, 'c/c'), 'content')
-
 })
 
 test('rename', async t => {
@@ -185,11 +218,11 @@ test('rename', async t => {
     'c/'
   ])
 
-  await pda.rename(archive, '/a', '/a-rename')
+  await pda.rename(archive, '/a', archive, '/a-rename')
   t.deepEqual(await pda.readFile(archive, '/a-rename'), 'content')
   t.deepEqual((await pda.stat(archive, '/a-rename')).isFile(), true)
 
-  await pda.rename(archive, '/b', '/b-rename')
+  await pda.rename(archive, '/b', archive, '/b-rename')
   t.deepEqual((await pda.stat(archive, '/b-rename')).isDirectory(), true)
   t.deepEqual(await pda.readFile(archive, '/b-rename/a'), 'content')
   t.deepEqual((await pda.stat(archive, '/b-rename/b')).isDirectory(), true)
@@ -198,13 +231,13 @@ test('rename', async t => {
   t.deepEqual(await pda.readFile(archive, '/b-rename/b/c'), 'content')
   t.deepEqual(await pda.readFile(archive, '/b-rename/c'), 'content')
 
-  await pda.rename(archive, '/b-rename/b', '/c/newb')
+  await pda.rename(archive, '/b-rename/b', archive, '/c/newb')
   t.deepEqual((await pda.stat(archive, '/c/newb')).isDirectory(), true)
   t.deepEqual(await pda.readFile(archive, 'c/newb/a'), 'content')
   t.deepEqual(await pda.readFile(archive, 'c/newb/b'), 'content')
   t.deepEqual(await pda.readFile(archive, 'c/newb/c'), 'content')
 
-  const err1 = await t.throws(pda.rename(archive, '/b-rename', '/b-rename/sub'))
+  const err1 = await t.throws(pda.rename(archive, '/b-rename', archive, '/b-rename/sub'))
   t.truthy(err1.invalidPath)
 })
 
@@ -221,11 +254,11 @@ test('rename w/fs', async t => {
     'c/'
   ])
 
-  await pda.rename(fs, '/a', '/a-rename')
+  await pda.rename(fs, '/a', fs, '/a-rename')
   t.deepEqual(await pda.readFile(fs, '/a-rename'), 'content')
   t.deepEqual((await pda.stat(fs, '/a-rename')).isFile(), true)
 
-  await pda.rename(fs, '/b', '/b-rename')
+  await pda.rename(fs, '/b', fs, '/b-rename')
   t.deepEqual((await pda.stat(fs, '/b-rename')).isDirectory(), true)
   t.deepEqual(await pda.readFile(fs, '/b-rename/a'), 'content')
   t.deepEqual((await pda.stat(fs, '/b-rename/b')).isDirectory(), true)
@@ -234,7 +267,7 @@ test('rename w/fs', async t => {
   t.deepEqual(await pda.readFile(fs, '/b-rename/b/c'), 'content')
   t.deepEqual(await pda.readFile(fs, '/b-rename/c'), 'content')
 
-  await pda.rename(fs, '/b-rename/b', '/c/newb')
+  await pda.rename(fs, '/b-rename/b', fs, '/c/newb')
   t.deepEqual((await pda.stat(fs, '/c/newb')).isDirectory(), true)
   t.deepEqual(await pda.readFile(fs, 'c/newb/a'), 'content')
   t.deepEqual(await pda.readFile(fs, 'c/newb/b'), 'content')
@@ -252,16 +285,16 @@ test('EntryAlreadyExistsError', async t => {
   const err2 = await t.throws(pda.mkdir(archive, '/file'))
   t.truthy(err2.entryAlreadyExists)
 
-  const err3 = await t.throws(pda.copy(archive, '/dir', '/file'))
+  const err3 = await t.throws(pda.copy(archive, '/dir', archive, '/file'))
   t.truthy(err3.entryAlreadyExists)
 
-  const err4 = await t.throws(pda.copy(archive, '/file', '/dir'))
+  const err4 = await t.throws(pda.copy(archive, '/file', archive, '/dir'))
   t.truthy(err4.entryAlreadyExists)
 
-  const err5 = await t.throws(pda.rename(archive, '/dir', '/file'))
+  const err5 = await t.throws(pda.rename(archive, '/dir', archive, '/file'))
   t.truthy(err5.entryAlreadyExists)
 
-  const err6 = await t.throws(pda.rename(archive, '/file', '/dir'))
+  const err6 = await t.throws(pda.rename(archive, '/file', archive, '/dir'))
   t.truthy(err6.entryAlreadyExists)
 })
 
@@ -276,16 +309,16 @@ test('EntryAlreadyExistsError w/fs', async t => {
   const err2 = await t.throws(pda.mkdir(fs, '/file'))
   t.truthy(err2.entryAlreadyExists)
 
-  const err3 = await t.throws(pda.copy(fs, '/dir', '/file'))
+  const err3 = await t.throws(pda.copy(fs, '/dir', fs, '/file'))
   t.truthy(err3.entryAlreadyExists)
 
-  const err4 = await t.throws(pda.copy(fs, '/file', '/dir'))
+  const err4 = await t.throws(pda.copy(fs, '/file', fs, '/dir'))
   t.truthy(err4.entryAlreadyExists)
 
-  const err5 = await t.throws(pda.rename(fs, '/dir', '/file'))
+  const err5 = await t.throws(pda.rename(fs, '/dir', fs, '/file'))
   t.truthy(err5.entryAlreadyExists)
 
-  const err6 = await t.throws(pda.rename(fs, '/file', '/dir'))
+  const err6 = await t.throws(pda.rename(fs, '/file', fs, '/dir'))
   t.truthy(err6.entryAlreadyExists)
 })
 
@@ -298,10 +331,10 @@ test('ArchiveNotWritableError', async t => {
   const err2 = await t.throws(pda.writeFile(archive, '/bar', 'foo'))
   t.truthy(err2.archiveNotWritable)
 
-  const err3 = await t.throws(pda.copy(archive, '/foo', '/bar'))
+  const err3 = await t.throws(pda.copy(archive, '/foo', archive, '/bar'))
   t.truthy(err3.archiveNotWritable)
 
-  const err4 = await t.throws(pda.rename(archive, '/foo', '/bar'))
+  const err4 = await t.throws(pda.rename(archive, '/foo', archive, '/bar'))
   t.truthy(err4.archiveNotWritable)
 })
 
@@ -314,10 +347,10 @@ test('InvalidPathError', async t => {
   const err2 = await t.throws(pda.mkdir(archive, '/foo%20bar'))
   t.truthy(err2.invalidPath)
 
-  const err3 = await t.throws(pda.copy(archive, '/foo', '/foo%20bar'))
+  const err3 = await t.throws(pda.copy(archive, '/foo', archive, '/foo%20bar'))
   t.truthy(err3.invalidPath)
 
-  const err4 = await t.throws(pda.rename(archive, '/foo', '/foo%20bar'))
+  const err4 = await t.throws(pda.rename(archive, '/foo', archive, '/foo%20bar'))
   t.truthy(err4.invalidPath)
 
   const noerr = await pda.mkdir(archive, '/foo bar')
@@ -333,10 +366,10 @@ test('InvalidPathError w/fs', async t => {
   const err2 = await t.throws(pda.mkdir(fs, '/foo%20bar'))
   t.truthy(err2.invalidPath)
 
-  const err3 = await t.throws(pda.copy(fs, '/foo', '/foo%20bar'))
+  const err3 = await t.throws(pda.copy(fs, '/foo', fs, '/foo%20bar'))
   t.truthy(err3.invalidPath)
 
-  const err4 = await t.throws(pda.rename(fs, '/foo', '/foo%20bar'))
+  const err4 = await t.throws(pda.rename(fs, '/foo', fs, '/foo%20bar'))
   t.truthy(err4.invalidPath)
 
   const noerr = await pda.mkdir(fs, '/foo bar')
@@ -360,10 +393,10 @@ test('ParentFolderDoesntExistError', async t => {
   const err4 = await t.throws(pda.mkdir(archive, '/foo/bar'))
   t.truthy(err4.parentFolderDoesntExist)
 
-  const err5 = await t.throws(pda.copy(archive, '/foo', '/bar/foo'))
+  const err5 = await t.throws(pda.copy(archive, '/foo', archive, '/bar/foo'))
   t.truthy(err5.parentFolderDoesntExist)
 
-  const err6 = await t.throws(pda.rename(archive, '/foo', '/bar/foo'))
+  const err6 = await t.throws(pda.rename(archive, '/foo', archive, '/bar/foo'))
   t.truthy(err6.parentFolderDoesntExist)
 })
 
@@ -384,10 +417,10 @@ test('ParentFolderDoesntExistError w/fs', async t => {
   const err4 = await t.throws(pda.mkdir(fs, '/foo/bar'))
   t.truthy(err4.parentFolderDoesntExist)
 
-  const err5 = await t.throws(pda.copy(fs, '/foo', '/bar/foo'))
+  const err5 = await t.throws(pda.copy(fs, '/foo', fs, '/bar/foo'))
   t.truthy(err5.parentFolderDoesntExist)
 
-  const err6 = await t.throws(pda.rename(fs, '/foo', '/bar/foo'))
+  const err6 = await t.throws(pda.rename(fs, '/foo', fs, '/bar/foo'))
   t.truthy(err6.parentFolderDoesntExist)
 })
 
