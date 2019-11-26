@@ -291,11 +291,8 @@ test('EntryAlreadyExistsError', async t => {
   const err4 = await t.throws(pda.copy(archive, '/file', archive, '/dir'))
   t.truthy(err4.entryAlreadyExists)
 
-  const err5 = await t.throws(pda.rename(archive, '/dir', archive, '/file'))
+  const err5 = await t.throws(pda.rename(archive, '/file', archive, '/dir'))
   t.truthy(err5.entryAlreadyExists)
-
-  const err6 = await t.throws(pda.rename(archive, '/file', archive, '/dir'))
-  t.truthy(err6.entryAlreadyExists)
 })
 
 test('EntryAlreadyExistsError w/fs', async t => {
@@ -315,11 +312,8 @@ test('EntryAlreadyExistsError w/fs', async t => {
   const err4 = await t.throws(pda.copy(fs, '/file', fs, '/dir'))
   t.truthy(err4.entryAlreadyExists)
 
-  const err5 = await t.throws(pda.rename(fs, '/dir', fs, '/file'))
+  const err5 = await t.throws(pda.rename(fs, '/file', fs, '/dir'))
   t.truthy(err5.entryAlreadyExists)
-
-  const err6 = await t.throws(pda.rename(fs, '/file', fs, '/dir'))
-  t.truthy(err6.entryAlreadyExists)
 })
 
 test('ArchiveNotWritableError', async t => {
