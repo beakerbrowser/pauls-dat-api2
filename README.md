@@ -126,7 +126,7 @@ st.isSymbolicLink()
  - `opts`. Options (object|string). If a string, will act as `opts.encoding`.
  - `opts.encoding` Desired output encoding (string). May be 'binary', 'utf8', 'hex', or 'base64'. Default 'utf8'.
  - Returns the content of the file in the requested encoding.
- - Throws NotFoundError, NotAFileError.
+ - Throws NotFoundError.
 
 ```js
 var manifestStr = await pda.readFile(archive, '/dat.json')
@@ -174,12 +174,12 @@ console.log(size) // => 123
  - `opts.start` Starting offset (number). Default 0.
  - `opts.end`. Ending offset inclusive (number). Default undefined.
  - `opts.length`. How many bytes to read (number). Default undefined.
- - Returns the content of the file.
- - Throws NotFoundError, NotAFileError.
+ - Returns a readable stream.
+ - Throws NotFoundError.
 
 ```js
-await pda.createReadStream(archive, '/favicon.png')
-await pda.createReadStream(archive, '/favicon.png', {
+pda.createReadStream(archive, '/favicon.png')
+pda.createReadStream(archive, '/favicon.png', {
   start: 1,
   end: 3
 })
