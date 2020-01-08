@@ -29,7 +29,7 @@ test('writeFile', async t => {
   t.deepEqual(await pda.readFile(archive, 'foo', 'buffer'), Buffer.from([0x03]))
 })
 
-test('writeFile w/fs', async t => {
+test.skip('writeFile w/fs', async t => {
   var fs = await tutil.createFs([
     'foo'
   ])
@@ -55,7 +55,7 @@ test('mkdir', async t => {
   t.deepEqual((await pda.stat(archive, '/bar')).isDirectory(), true)
 })
 
-test('mkdir w/fs', async t => {
+test.skip('mkdir w/fs', async t => {
   var fs = await tutil.createFs([
     'foo'
   ])
@@ -83,7 +83,7 @@ test('symlink', async t => {
   // t.deepEqual((await pda.lstat(archive, '/foo2')).isSymbolicLink(), true) TODO
 })
 
-test('symlink w/fs', async t => {
+test.skip('symlink w/fs', async t => {
   var fs = await tutil.createFs([
     'foo',
     'bar/',
@@ -172,7 +172,7 @@ test('copy between archives', async t => {
   t.deepEqual(await pda.readFile(archive2, 'c/c'), 'content')
 })
 
-test('copy w/fs', async t => {
+test.skip('copy w/fs', async t => {
   var fs = await tutil.createFs([
     {name: 'a', content: 'thecopy'},
     'b/',
@@ -241,7 +241,7 @@ test('rename', async t => {
   t.truthy(err1.invalidPath)
 })
 
-test('rename w/fs', async t => {
+test.skip('rename w/fs', async t => {
   var fs = await tutil.createFs([
     'a',
     'b/',
@@ -351,7 +351,7 @@ test('InvalidPathError', async t => {
   t.truthy(typeof noerr === 'undefined')
 })
 
-test('InvalidPathError w/fs', async t => {
+test.skip('InvalidPathError w/fs', async t => {
   var fs = await tutil.createFs([])
 
   const err1 = await t.throws(pda.writeFile(fs, '/foo%20bar', 'new content'))
@@ -394,7 +394,7 @@ test('ParentFolderDoesntExistError', async t => {
   t.truthy(err6.parentFolderDoesntExist)
 })
 
-test('ParentFolderDoesntExistError w/fs', async t => {
+test.skip('ParentFolderDoesntExistError w/fs', async t => {
   var fs = await tutil.createFs([
     'foo'
   ])
@@ -444,7 +444,7 @@ test('createWriteStream', async t => {
   t.deepEqual(await pda.readFile(archive, 'foo', 'buffer'), Buffer.from([0x01]))
 })
 
-test('createWriteStream w/fs', async t => {
+test.skip('createWriteStream w/fs', async t => {
   var fs = await tutil.createFs([
     'foo'
   ])

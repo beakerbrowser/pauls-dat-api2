@@ -138,6 +138,10 @@ test('readdir includeStats', async t => {
   t.is(typeof list[0].stat, 'object')
   t.truthy(typeof list[0].mount)
   t.is(typeof list[0].mount, 'object')
+
+  await pda.writeFile(archive, '/meta-test', 'asdf', {metadata: {foo: 'bar'}})
+  list = await pda.readdir(archive, '/', {includeStats: true})
+  t.deepEqual(list.find(item => item.name === 'meta-test').stat.metadata.foo, 'bar')
 })
 
 test.skip('readdir w/fs', async t => {
