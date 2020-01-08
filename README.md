@@ -138,6 +138,7 @@ var imageBase64 = await pda.readFile(archive, '/favicon.png', 'base64')
  - `archive` Hyperdrive archive (object).
  - `path` Target directory path (string).
  - `opts.recursive` Read all subfolders and their files as well if true. Note: does not recurse into mounts.
+ - `opts.includeStats` Output an object which includes the file name, stats object, and parent mount information.
  - Returns an array of file and folder names.
 
 ```js
@@ -150,6 +151,16 @@ console.log(listing) /* => [
   'assets',
   'assets/profile.png',
   'assets/styles.css'
+]*/
+
+var listing = await pda.readdir(archive, '/', { includeStats: true })
+console.log(listing) /* => [
+  {
+    name: 'profile.png',
+    stats: { ... },
+    mount: { ... }
+  },
+  ...
 ]*/
 ```
 

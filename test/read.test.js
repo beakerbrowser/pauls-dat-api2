@@ -124,6 +124,22 @@ test('readdir', async t => {
   t.deepEqual(await pda.readdir(archive, '/foo/'), ['bar'])
 })
 
+test('readdir includeStats', async t => {
+  var archive = await tutil.createArchive(daemon, [
+    'foo/',
+    'foo/bar',
+    'baz'
+  ])
+
+  var list
+  list = await pda.readdir(archive, '/', {includeStats: true})
+  t.is(typeof list[0].name, 'string')
+  t.truthy(typeof list[0].stat)
+  t.is(typeof list[0].stat, 'object')
+  t.truthy(typeof list[0].mount)
+  t.is(typeof list[0].mount, 'object')
+})
+
 test.skip('readdir w/fs', async t => {
   var fs = await tutil.createFs([
     'foo/',
