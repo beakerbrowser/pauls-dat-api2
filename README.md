@@ -61,9 +61,8 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
   - [writeManifest(archive, manifest[, cb])](#writemanifestarchive-manifest-cb)
   - [updateManifest(archive, manifest[, cb])](#updatemanifestarchive-manifest-cb)
   - [generateManifest(opts)](#generatemanifestopts)
-- [Diff/Merge](#diffmerge)
-  - [diff(srcArchive, srcPath, dstArchive, dstPath[, opts, cb])](#diffsrcarchive-srcpath-dstarchive-dstpath-opts-cb)
-  - [merge(srcArchive, srcPath, dstArchive, dstPath[, opts, cb])](#mergesrcarchive-srcpath-dstarchive-dstpath-opts-cb)
+- [Diff](#diff)
+  - [diff(archive, other[, prefix])](#diffarchive-other-prefix)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -592,72 +591,29 @@ Helper to generate a manifest object. Opts in detail:
 
 See: https://github.com/datprotocol/dat.json
 
-## Diff/Merge
+## Diff
 
-### diff(srcArchive, srcPath, dstArchive, dstPath[, opts, cb])
+### diff(archive, other[, prefix])
 
- - `srcArchive` Source archive (object). Required.
- - `srcPath` Source path within the source archive (string). Required.
- - `dstArchive` Destination archive (object). Required.
- - `dstPath` Destination path within the destination archive (string). Required.
- - `opts.shallow` Don't descend into changed folders (bool). Optional, default false.
- - `opts.compareContent`. Compare the content of the files, rather than the mtime and size. Optional, default false.
- - `opts.paths` Whitelist of files to diff (array<string>). Optional.
- - `opts.ops` Whitelist of operations to include in the diff (array<string>). Optional. Valid values are `'add'`, `'mod'`, and `'del'`.
+ - `archive` Archive (object). Required.
+ - `other` Other version to diff against (number|object). Required.
+ - `prefix` Path prefix to filter down to (string). Optional.
  - Returns diff data.
 
-Get a list of differences between the two archives at the given paths.
+Get a list of differences between an archive at two points in its history
 
 ```js
-await pda.diff(archiveA, '/', archiveB, '/')
-await pda.diff(archiveA, '/', archiveB, '/', {shallow: false, compareContent: true})
-await pda.diff(archiveA, '/', archiveB, '/', {paths: ['/foo', '/bar']})
-await pda.diff(archiveA, '/', archiveB, '/', {ops: ['add']}) // additions only
+await pda.diff(archive, 2)
+await pda.diff(archive, await archive.checkout(2))
+await pda.diff(archive, 2, '/subfolder')
 ```
 
 Output looks like:
 
 ```
 [
-  {change: 'mod', type: 'file', path: '/hello.txt'},
-  {change: 'add', type: 'dir',  path: '/pics'},
-  {change: 'add', type: 'file', path: '/pics/kitty.png'},
-  {change: 'del', type: 'file', path: '/backup/hello.txt'},
-  {change: 'del', type: 'dir',  path: '/backup'},
-  {change: 'del', type: 'file', path: '/hello.txt'},
-]
-```
-
-### merge(srcArchive, srcPath, dstArchive, dstPath[, opts, cb])
-
- - `srcArchive` Source archive (object). Required.
- - `srcPath` Source path within the source archive (string). Required.
- - `dstArchive` Destination archive (object). Required.
- - `dstPath` Destination path within the destination archive (string). Required.
- - `opts.shallow` Don't descend into changed folders (bool). Optional, default false.
- - `opts.compareContent`. Compare the content of the files, rather than the mtime and size. Optional, default false.
- - `opts.paths` Whitelist of files to diff (array<string>). Optional.
- - `opts.ops` Whitelist of operations to include in the diff (array<string>). Optional. Valid values are `'add'`, `'mod'`, and `'del'`.
- - Returns the changes applied.
-
-Merges the source archive into the destinatio archive at the given paths, causing `dstArchive` content to match `srcArchive`.
-
-```js
-await pda.merge(archiveA, '/', archiveB, '/')
-await pda.merge(archiveA, '/', archiveB, '/', {shallow: false, compareContent: true})
-await pda.merge(archiveA, '/', archiveB, '/', {paths: ['/foo', '/bar']})
-await pda.merge(archiveA, '/', archiveB, '/', {ops: ['add']}) // additions only
-```
-
-Output looks like:
-
-```
-[
-  {change: 'mod', type: 'file', path: '/hello.txt'},
-  {change: 'add', type: 'dir',  path: '/pics'},
-  {change: 'add', type: 'file', path: '/pics/kitty.png'},
-  {change: 'del', type: 'file', path: '/backup/hello.txt'},
-  {change: 'del', type: 'dir',  path: '/backup'},
-  {change: 'del', type: 'file', path: '/hello.txt'},
+  {type: 'put', name: 'hello.txt', value: {stat: {...}}},
+  {type: 'put', name: 'mounted-folder', value: {mount: {...}}},
+  {type: 'del', name: 'hello.txt'}
 ]
 ```
