@@ -28,6 +28,7 @@ test('diff', async t => {
   t.is(changes[0].name, 'subdir')
   t.is(typeof changes[0].value.stat, 'object')
   t.is(changes[0].value.stat.mode, 16877)
+
   changes = await pda.diff(archive, 2)
   t.is(changes.length, 4)
   var oldArchive = await archive.checkout(2)
@@ -35,4 +36,12 @@ test('diff', async t => {
   t.deepEqual(changes, changes2)
   changes = await pda.diff(archive, 0, 'subdir')
   t.is(changes.length, 3)
+
+  var archive2 = await tutil.createArchive(daemon, ['bar'])
+  await pda.mount(archive, '/foo', archive2.key)
+  // TODO mounts
+
+  await pda.writeFile(archive, '/meta', '', {metadata: {foo: 'bar'}})
+  changes = await pda.diff(archive)
+  t.is(changes.find(c => c.name === 'meta').value.stat.metadata.foo, 'bar')
 })

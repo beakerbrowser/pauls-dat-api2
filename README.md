@@ -613,7 +613,7 @@ Output looks like:
 ```
 [
   {type: 'put', name: 'hello.txt', value: {stat: {...}}},
-  {type: 'put', name: 'mounted-folder', value: {mount: {...}}},
+  {type: 'mount', name: 'mounted-folder', value: {mount: {...}}},
   {type: 'del', name: 'hello.txt'}
 ]
 ```
