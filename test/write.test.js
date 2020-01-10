@@ -111,10 +111,12 @@ test('copy', async t => {
     'b/c',
     'c/'
   ])
+  await pda.updateMetadata(archive, 'a', {foo: 'bar'})
 
   await pda.copy(archive, '/a', archive, '/a-copy')
   t.deepEqual(await pda.readFile(archive, '/a-copy'), 'thecopy')
   t.deepEqual((await pda.stat(archive, '/a-copy')).isFile(), true)
+  t.deepEqual((await pda.stat(archive, '/a-copy')).metadata.foo, 'bar')
 
   await pda.copy(archive, '/b', archive, '/b-copy')
   t.deepEqual((await pda.stat(archive, '/b-copy')).isDirectory(), true)
@@ -150,11 +152,13 @@ test('copy between archives', async t => {
     'b/c',
     'c/'
   ])
+  await pda.updateMetadata(archive1, 'a', {foo: 'bar'})
   var archive2 = await tutil.createArchive(daemon, [])
 
   await pda.copy(archive1, '/a', archive2, '/a')
   t.deepEqual(await pda.readFile(archive2, '/a'), 'thecopy')
   t.deepEqual((await pda.stat(archive2, '/a')).isFile(), true)
+  t.deepEqual((await pda.stat(archive2, '/a')).metadata.foo, 'bar')
 
   await pda.copy(archive1, '/b', archive2, '/b')
   t.deepEqual((await pda.stat(archive2, '/b')).isDirectory(), true)
@@ -217,10 +221,12 @@ test('rename', async t => {
     'b/c',
     'c/'
   ])
+  await pda.updateMetadata(archive, 'a', {foo: 'bar'})
 
   await pda.rename(archive, '/a', archive, '/a-rename')
   t.deepEqual(await pda.readFile(archive, '/a-rename'), 'content')
   t.deepEqual((await pda.stat(archive, '/a-rename')).isFile(), true)
+  t.deepEqual((await pda.stat(archive, '/a-rename')).metadata.foo, 'bar')
 
   await pda.rename(archive, '/b', archive, '/b-rename')
   t.deepEqual((await pda.stat(archive, '/b-rename')).isDirectory(), true)
