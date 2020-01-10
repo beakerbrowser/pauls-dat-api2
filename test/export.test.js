@@ -248,6 +248,10 @@ test('exportArchiveToFilesystem', async t => {
 })
 
 test('exportArchiveToArchive', async t => {
+  const srcArchiveMount = await tutil.createArchive(daemon, [
+    'mountfile',
+    'mountdir/'
+  ])
   const srcArchiveA = await tutil.createArchive(daemon, [
     'foo.txt',
     { name: 'bar.data', content: Buffer.from([0x00, 0x01]) },
@@ -255,6 +259,7 @@ test('exportArchiveToArchive', async t => {
     'subdir/foo.txt',
     { name: 'subdir/bar.data', content: Buffer.from([0x00, 0x01]) }
   ])
+  await pda.mount(srcArchiveA, '/mount', srcArchiveMount.key)
 
   const dstArchiveA = await tutil.createArchive(daemon)
   const dstArchiveB = await tutil.createArchive(daemon)
@@ -279,8 +284,10 @@ test('exportArchiveToArchive', async t => {
     dstArchive: dstArchiveA
   })
 
-  t.deepEqual((await pda.readdir(dstArchiveA, '/')).sort(), ['bar.data', 'foo.txt', 'subdir'].sort())
+  t.deepEqual((await pda.readdir(dstArchiveA, '/')).sort(), ['bar.data', 'foo.txt', 'mount', 'subdir'].sort())
   t.deepEqual((await pda.readdir(dstArchiveA, '/subdir')).sort(), ['bar.data', 'foo.txt'])
+  t.deepEqual((await pda.readdir(dstArchiveA, '/mount')).sort(), ['mountdir', 'mountfile'])
+  t.deepEqual((await pda.stat(dstArchiveA, '/mount')).mount.key, srcArchiveMount.key)
 
   // export from subdir
   // =
@@ -303,8 +310,10 @@ test('exportArchiveToArchive', async t => {
   })
 
   t.deepEqual((await pda.readdir(dstArchiveC, '/')).sort(), ['gpdir'].sort())
-  t.deepEqual((await pda.readdir(dstArchiveC, '/gpdir')).sort(), ['bar.data', 'foo.txt', 'subdir'].sort())
+  t.deepEqual((await pda.readdir(dstArchiveC, '/gpdir')).sort(), ['bar.data', 'foo.txt', 'mount', 'subdir'].sort())
   t.deepEqual((await pda.readdir(dstArchiveC, '/gpdir/subdir')).sort(), ['bar.data', 'foo.txt'])
+  t.deepEqual((await pda.readdir(dstArchiveC, '/gpdir/mount')).sort(), ['mountdir', 'mountfile'])
+  t.deepEqual((await pda.stat(dstArchiveC, '/gpdir/mount')).mount.key, srcArchiveMount.key)
 
   // export from subdir to subdir
   // =
@@ -327,8 +336,10 @@ test('exportArchiveToArchive', async t => {
     dstArchive: dstArchiveE
   })
 
-  t.deepEqual((await pda.readdir(dstArchiveE, '/')).sort(), ['bar.data', 'foo.txt', 'otherfile.txt', 'subdir'].sort())
+  t.deepEqual((await pda.readdir(dstArchiveE, '/')).sort(), ['bar.data', 'foo.txt', 'otherfile.txt', 'mount', 'subdir'].sort())
   t.deepEqual((await pda.readdir(dstArchiveE, '/subdir')).sort(), ['bar.data', 'foo.txt'])
+  t.deepEqual((await pda.readdir(dstArchiveE, '/mount')).sort(), ['mountdir', 'mountfile'])
+  t.deepEqual((await pda.stat(dstArchiveE, '/mount')).mount.key, srcArchiveMount.key)
 
   // into bad subdir
   // =
