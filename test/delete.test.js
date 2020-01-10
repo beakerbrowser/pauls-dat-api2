@@ -83,6 +83,22 @@ test('rmdir recursive', async t => {
   t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).map(tutil.tonix).sort(), ['a', 'c', 'c/b'].sort())
 })
 
+test('rmdir recursive w/mounts', async t => {
+  var archive = await tutil.createArchive(daemon, [
+    'foo',
+    'sub/'
+  ])
+  var archive2 = await tutil.createArchive(daemon, [
+    'mountfile',
+    'mountdir/'
+  ])
+  await pda.mount(archive, '/sub/mount', archive2.key)
+
+  await pda.rmdir(archive, 'sub', {recursive: true})
+  t.deepEqual((await pda.readdir(archive, '/', {recursive: true})).map(tutil.tonix).sort(), ['foo'].sort())
+  t.deepEqual((await pda.readdir(archive2, '/', {recursive: true})).map(tutil.tonix).sort(), ['mountfile', 'mountdir'].sort())
+})
+
 test('rmdir NotFoundError, NotAFolderError, DestDirectoryNotEmpty', async t => {
   var archive = await tutil.createArchive(daemon, [
     'a',
@@ -109,7 +125,7 @@ test('ArchiveNotWritableError', async t => {
   t.truthy(err2.archiveNotWritable)
 })
 
-test('unlink w/fs', async t => {
+test.skip('unlink w/fs', async t => {
   var fs = await tutil.createFs([
     'a',
     'b/',
@@ -128,7 +144,7 @@ test('unlink w/fs', async t => {
   t.deepEqual((await pda.readdir(fs, '/', {recursive: true})).sort().map(tutil.tonix), ['b', 'c', 'c/b'])
 })
 
-test('unlink NotFoundError, NotAFileError w/fs', async t => {
+test.skip('unlink NotFoundError, NotAFileError w/fs', async t => {
   var fs = await tutil.createFs([
     'a',
     'b/',
@@ -144,7 +160,7 @@ test('unlink NotFoundError, NotAFileError w/fs', async t => {
   t.truthy(err2.notAFile)
 })
 
-test('rmdir w/fs', async t => {
+test.skip('rmdir w/fs', async t => {
   var fs = await tutil.createFs([
     'a',
     'b/',
@@ -159,7 +175,7 @@ test('rmdir w/fs', async t => {
   t.deepEqual((await pda.readdir(fs, '/', {recursive: true})).sort(), ['a', 'c'].sort())
 })
 
-test('rmdir recursive w/fs', async t => {
+test.skip('rmdir recursive w/fs', async t => {
   var fs = await tutil.createFs([
     'a',
     'b/',
@@ -181,7 +197,7 @@ test('rmdir recursive w/fs', async t => {
   t.deepEqual((await pda.readdir(fs, '/', {recursive: true})).map(tutil.tonix).sort(), ['a', 'c', 'c/b'])
 })
 
-test('rmdir NotFoundError, NotAFolderError, DestDirectoryNotEmpty w/fs', async t => {
+test.skip('rmdir NotFoundError, NotAFolderError, DestDirectoryNotEmpty w/fs', async t => {
   var fs = await tutil.createFs([
     'a',
     'b/',
