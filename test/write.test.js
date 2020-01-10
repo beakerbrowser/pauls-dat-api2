@@ -176,6 +176,24 @@ test('copy between archives', async t => {
   t.deepEqual(await pda.readFile(archive2, 'c/c'), 'content')
 })
 
+test('copy with mounts', async t => {
+  var archive1 = await tutil.createArchive(daemon, [
+    'foo',
+    'subdir/'
+  ])
+  var archive2 = await tutil.createArchive(daemon, [
+    'mountfile',
+    'mountdir/'
+  ])
+  await pda.mount(archive1, '/subdir/mount', archive2.key)
+
+  await pda.copy(archive1, '/subdir', archive1, '/subdir-copy')
+  t.deepEqual(
+    (await pda.readdir(archive1, '/subdir', {recursive: true})).sort(),
+    (await pda.readdir(archive1, '/subdir-copy', {recursive: true})).sort()
+  )
+})
+
 test.skip('copy w/fs', async t => {
   var fs = await tutil.createFs([
     {name: 'a', content: 'thecopy'},
@@ -245,6 +263,28 @@ test('rename', async t => {
 
   const err1 = await t.throws(pda.rename(archive, '/b-rename', archive, '/b-rename/sub'))
   t.truthy(err1.invalidPath)
+})
+
+test('rename with mounts', async t => {
+  var archive1 = await tutil.createArchive(daemon, [
+    'foo',
+    'subdir/'
+  ])
+  var archive2 = await tutil.createArchive(daemon, [
+    'mountfile',
+    'mountdir/'
+  ])
+  await pda.mount(archive1, '/subdir/mount', archive2.key)
+
+  await pda.rename(archive1, '/subdir', archive1, '/subdir-renamed')
+  t.deepEqual(
+    (await pda.readdir(archive1, '/subdir-renamed')).sort(),
+    ['mount']
+  )
+  t.deepEqual(
+    (await pda.readdir(archive1, '/subdir-renamed/mount')).sort(),
+    ['mountdir', 'mountfile']
+  )
 })
 
 test.skip('rename w/fs', async t => {
