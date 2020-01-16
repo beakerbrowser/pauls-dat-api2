@@ -81,7 +81,7 @@ const pda = require('pauls-dat-api')
 
 ```js
 // by name:
-var st = await pda.stat(archive, '/dat.json')
+var st = await pda.stat(archive, '/index.json')
 st.isDirectory()
 st.isFile()
 console.log(st) /* =>
@@ -112,7 +112,7 @@ Stat {
 
 ```js
 // by name:
-var st = await pda.lstat(archive, '/dat.json')
+var st = await pda.lstat(archive, '/index.json')
 st.isSymbolicLink()
 ```
 
@@ -128,7 +128,7 @@ st.isSymbolicLink()
  - Throws NotFoundError.
 
 ```js
-var manifestStr = await pda.readFile(archive, '/dat.json')
+var manifestStr = await pda.readFile(archive, '/index.json')
 var imageBase64 = await pda.readFile(archive, '/favicon.png', 'base64')
 ```
 
@@ -589,7 +589,7 @@ Helper to generate a manifest object. Opts in detail:
 }
 ```
 
-See: https://github.com/datprotocol/dat.json
+See: https://github.com/datprotocol/index.json
 
 ## Diff
 
