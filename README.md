@@ -47,8 +47,6 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 - [Mounts](#mounts)
   - [mount(archive, name, opts[, cb])](#mountarchive-name-opts-cb)
   - [unmount(archive, name[, cb])](#unmountarchive-name-cb)
-- [Network](#network)
-  - [download(archive, name[, cb])](#downloadarchive-name-cb)
 - [Activity Streams](#activity-streams)
   - [watch(archive[, path])](#watcharchive-path)
   - [createNetworkActivityStream(archive)](#createnetworkactivitystreamarchive)
@@ -349,24 +347,6 @@ await pda.mount(archive, '/foo', archive2.key)
 
 ```js
 await pda.unmount(archive, '/foo')
-```
-
-## Network
-
-### download(archive, name[, cb])
-
- - `archive` Hyperdrive archive (object). Can not be a scoped-fs object.
- - `name` Entry path (string). Can point to a file or folder.
-
-Download an archive file or folder-tree.
-
-```js
-// download a specific file:
-await pda.download(archive, '/foo.txt')
-// download a specific folder and all children:
-await pda.download(archive, '/bar/')
-// download the entire archive:
-await pda.download(archive, '/')
 ```
 
 ## Activity Streams
