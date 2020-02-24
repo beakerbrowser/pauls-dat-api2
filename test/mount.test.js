@@ -20,10 +20,6 @@ test('mount and unmount', async t => {
   await pda.mount(archive1, '/foo', archive2.key)
   t.deepEqual((await pda.readdir(archive1, '/')).sort(), ['foo'].sort())
   t.deepEqual((await pda.readdir(archive1, '/foo')).sort(), ['bar'].sort())
-  t.deepEqual((await pda.readdir(archive1, '/', {recursive: true})).sort(), [
-    "foo",
-    "foo/bar"
-  ].sort())
   t.deepEqual((await pda.stat(archive1, '/foo')).isDirectory(), true)
   await pda.writeFile(archive2, 'hello.txt', 'hello')
   t.deepEqual(await pda.readFile(archive1, '/foo/hello.txt', 'utf8'), 'hello')
