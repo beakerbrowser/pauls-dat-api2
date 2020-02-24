@@ -259,6 +259,8 @@ test('exportArchiveToArchive', async t => {
     'subdir/foo.txt',
     { name: 'subdir/bar.data', content: Buffer.from([0x00, 0x01]) }
   ])
+  await pda.updateMetadata(srcArchiveA, '/foo.txt', {foo: 'bar', fuz: 'baz'})
+  await pda.updateMetadata(srcArchiveA, '/subdir/foo.txt', {key: 'value'})
   await pda.mount(srcArchiveA, '/mount', srcArchiveMount.key)
 
   const dstArchiveA = await tutil.createArchive(daemon)
@@ -288,6 +290,9 @@ test('exportArchiveToArchive', async t => {
   t.deepEqual((await pda.readdir(dstArchiveA, '/subdir')).sort(), ['bar.data', 'foo.txt'])
   t.deepEqual((await pda.readdir(dstArchiveA, '/mount')).sort(), ['mountdir', 'mountfile'])
   t.deepEqual((await pda.stat(dstArchiveA, '/mount')).mount.key, srcArchiveMount.key)
+  t.deepEqual((await pda.stat(dstArchiveA, '/foo.txt')).metadata.foo, 'bar')
+  t.deepEqual((await pda.stat(dstArchiveA, '/foo.txt')).metadata.fuz, 'baz')
+  t.deepEqual((await pda.stat(dstArchiveA, '/subdir/foo.txt')).metadata.key, 'value')
 
   // export from subdir
   // =
