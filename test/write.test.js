@@ -362,8 +362,13 @@ test('EntryAlreadyExistsError w/fs', async t => {
   t.truthy(err5.entryAlreadyExists)
 })
 
-test('ArchiveNotWritableError', async t => {
-  var archive = await tutil.createArchive(daemon, [], tutil.FAKE_DAT_KEY)
+test.skip('ArchiveNotWritableError', async t => {
+  // FIXME
+  // the 2 daemons need to communicate for this test to work
+  // -prfs
+
+  var archiveOrig = await tutil.createArchive(daemon2, [])
+  var archive = await tutil.createArchive(daemon, [], archiveOrig.key)
 
   const err1 = await t.throws(pda.mkdir(archive, '/bar'))
   t.truthy(err1.archiveNotWritable)
