@@ -27,6 +27,20 @@ test('writeFile', async t => {
   t.deepEqual(await pda.readFile(archive, 'foo', 'buffer'), Buffer.from([0x02]))
   await pda.writeFile(archive, 'foo', 'Aw==', { encoding: 'base64' })
   t.deepEqual(await pda.readFile(archive, 'foo', 'buffer'), Buffer.from([0x03]))
+
+  await pda.writeFile(archive, '/one/two/three.txt', 'asdf', {ensureParent: true})
+  t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two/three.txt')).isFile(), true)
+  await pda.writeFile(archive, '/one/two/four.txt', 'asdf', {ensureParent: true})
+  t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two/three.txt')).isFile(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two/four.txt')).isFile(), true)
+
+  await pda.writeFile(archive, '/a-file.txt', 'bar')
+  const err1 = await t.throws(pda.writeFile(archive, '/a-file.txt/another-file.txt', 'asdf', {ensureParent: true}))
+  t.truthy(err1.name, 'EntryAlreadyExistsError')
 })
 
 test.skip('writeFile w/fs', async t => {
@@ -53,6 +67,20 @@ test('mkdir', async t => {
   await pda.mkdir(archive, '/bar')
   t.deepEqual((await pda.readdir(archive, '/')).sort(), ['bar', 'foo'].sort())
   t.deepEqual((await pda.stat(archive, '/bar')).isDirectory(), true)
+
+  await pda.mkdir(archive, '/one/two/three', {ensureParent: true})
+  t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two/three')).isDirectory(), true)
+  await pda.mkdir(archive, '/one/two/three/four', {ensureParent: true})
+  t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two/three')).isDirectory(), true)
+  t.deepEqual((await pda.stat(archive, '/one/two/three/four')).isDirectory(), true)
+
+  await pda.writeFile(archive, '/foo.txt', 'bar')
+  const err1 = await t.throws(pda.mkdir(archive, '/foo.txt/bar', {ensureParent: true}))
+  t.truthy(err1.name, 'EntryAlreadyExistsError')
 })
 
 test.skip('mkdir w/fs', async t => {

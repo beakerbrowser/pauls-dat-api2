@@ -34,7 +34,7 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
   - [createReadStream(archive, name[, opts, cb])](#createreadstreamarchive-name-opts-cb)
 - [Write](#write)
   - [writeFile(archive, name, data[, opts, cb])](#writefilearchive-name-data-opts-cb)
-  - [mkdir(archive, name[, cb])](#mkdirarchive-name-cb)
+  - [mkdir(archive, name[, opts, cb])](#mkdirarchive-name-opts-cb)
   - [symlink(archive, target, linkname[, cb])](#symlinkarchive-target-linkname-cb)
   - [copy(srcArchive, srcName, dstArchive, dstName[, cb])](#copysrcarchive-srcname-dstarchive-dstname-cb)
   - [rename(srcArchive, srcName, dstName[, cb])](#renamesrcarchive-srcname-dstname-cb)
@@ -203,6 +203,7 @@ pda.createReadStream(archive, '/favicon.png', {
  - `data` Data to write (string|Buffer).
  - `opts`. Options (object|string). If a string, will act as `opts.encoding`.
  - `opts.encoding` Desired file encoding (string). May be 'binary', 'utf8', 'hex', or 'base64'. Default 'utf8' if `data` is a string, 'binary' if `data` is a Buffer.
+ - `opts.ensureParent` If true, will create the parent folder if it does not exist.
  - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
 
 ```js
@@ -210,10 +211,12 @@ await pda.writeFile(archive, '/hello.txt', 'world', 'utf8')
 await pda.writeFile(archive, '/profile.png', fs.readFileSync('/tmp/dog.png'))
 ```
 
-### mkdir(archive, name[, cb])
+### mkdir(archive, name[, opts, cb])
 
  - `archive` Hyperdrive archive (object).
  - `name` Directory path (string).
+ - `opts`. Options (object).
+ - `opts.ensureParent` If true, will create the parent folder if it does not exist.
  - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
 
 ```js
