@@ -161,17 +161,6 @@ test('exportFilesystemToArchive', async t => {
   await t.throws(pda.exportFilesystemToArchive({
     srcPath,
     dstArchive,
-    dstPath: '/bad/subdir',
-    inplaceImport: true
-  }))
-  await t.throws(pda.exportFilesystemToArchive({
-    srcPath,
-    dstArchive,
-    dstPath: '/bad/subdir'
-  }))
-  await t.throws(pda.exportFilesystemToArchive({
-    srcPath,
-    dstArchive,
     dstPath: '/subdir3/foo.txt',
     inplaceImport: true
   }))
@@ -349,11 +338,6 @@ test('exportArchiveToArchive', async t => {
   // into bad subdir
   // =
 
-  await t.throws(pda.exportArchiveToArchive({
-    srcArchive: srcArchiveA,
-    dstArchive: dstArchiveE,
-    dstPath: '/bad/subdir'
-  }))
   await t.throws(pda.exportArchiveToArchive({
     srcArchive: srcArchiveA,
     dstArchive: dstArchiveE,

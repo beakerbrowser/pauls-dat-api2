@@ -26,6 +26,9 @@ test('mount and unmount', async t => {
 
   await pda.unmount(archive1, '/foo')
   t.deepEqual((await pda.readdir(archive1, '/')).sort(), [])
+
+  await pda.mount(archive1, '/bar/foo', archive2.key)
+  t.deepEqual((await pda.readdir(archive1, '/bar/foo')).sort(), ['bar', 'hello.txt'].sort())
 })
 
 test('mount at version', async t => {
@@ -72,19 +75,6 @@ test('InvalidPathError', async t => {
 
   const err2 = await t.throws(pda.unmount(archive, '/foo%20bar'))
   t.truthy(err2.invalidPath)
-})
-
-test('ParentFolderDoesntExistError', async t => {
-  var archive = await tutil.createArchive(daemon, [
-    'foo'
-  ])
-  var archive2 = await tutil.createArchive(daemon, [])
-
-  const err1 = await t.throws(pda.mount(archive, '/bar/foo', archive2.key))
-  t.truthy(err1.parentFolderDoesntExist)
-
-  const err2 = await t.throws(pda.mount(archive, '/foo/bar', archive2.key))
-  t.truthy(err2.parentFolderDoesntExist)
 })
 
 test('unmount NotFoundError', async t => {

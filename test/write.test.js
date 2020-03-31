@@ -28,19 +28,22 @@ test('writeFile', async t => {
   await pda.writeFile(archive, 'foo', 'Aw==', { encoding: 'base64' })
   t.deepEqual(await pda.readFile(archive, 'foo', 'buffer'), Buffer.from([0x03]))
 
-  await pda.writeFile(archive, '/one/two/three.txt', 'asdf', {ensureParent: true})
+  await pda.writeFile(archive, '/one/two/three.txt', 'asdf')
   t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two/three.txt')).isFile(), true)
-  await pda.writeFile(archive, '/one/two/four.txt', 'asdf', {ensureParent: true})
+  await pda.writeFile(archive, '/one/two/four.txt', 'asdf')
   t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two/three.txt')).isFile(), true)
   t.deepEqual((await pda.stat(archive, '/one/two/four.txt')).isFile(), true)
 
-  await pda.writeFile(archive, '/a-file.txt', 'bar')
-  const err1 = await t.throws(pda.writeFile(archive, '/a-file.txt/another-file.txt', 'asdf', {ensureParent: true}))
-  t.truthy(err1.name, 'EntryAlreadyExistsError')
+  await pda.writeFile(archive, '/a-file.txt', 'asdf')
+  await pda.writeFile(archive, '/a-file.txt/sub-file.txt', 'fdsa')
+  t.deepEqual(await pda.readFile(archive, '/a-file.txt'), 'asdf')
+  t.truthy((await pda.stat(archive, '/a-file.txt')).isFile())
+  t.deepEqual(await pda.readdir(archive, '/a-file.txt'), ['sub-file.txt'])
+  t.deepEqual(await pda.readFile(archive, '/a-file.txt/sub-file.txt'), 'fdsa')
 })
 
 test.skip('writeFile w/fs', async t => {
@@ -68,19 +71,20 @@ test('mkdir', async t => {
   t.deepEqual((await pda.readdir(archive, '/')).sort(), ['bar', 'foo'].sort())
   t.deepEqual((await pda.stat(archive, '/bar')).isDirectory(), true)
 
-  await pda.mkdir(archive, '/one/two/three', {ensureParent: true})
+  await pda.mkdir(archive, '/one/two/three')
   t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two/three')).isDirectory(), true)
-  await pda.mkdir(archive, '/one/two/three/four', {ensureParent: true})
+  await pda.mkdir(archive, '/one/two/three/four')
   t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two/three')).isDirectory(), true)
   t.deepEqual((await pda.stat(archive, '/one/two/three/four')).isDirectory(), true)
 
   await pda.writeFile(archive, '/foo.txt', 'bar')
-  const err1 = await t.throws(pda.mkdir(archive, '/foo.txt/bar', {ensureParent: true}))
-  t.truthy(err1.name, 'EntryAlreadyExistsError')
+  await pda.mkdir(archive, '/foo.txt/bar')
+  t.deepEqual((await pda.stat(archive, '/foo.txt')).isFile(), true)
+  t.deepEqual((await pda.stat(archive, '/foo.txt/bar')).isDirectory(), true)
 })
 
 test.skip('mkdir w/fs', async t => {
@@ -447,54 +451,6 @@ test.skip('InvalidPathError w/fs', async t => {
 
   const noerr = await pda.mkdir(fs, '/foo bar')
   t.truthy(typeof noerr === 'undefined')
-})
-
-test('ParentFolderDoesntExistError', async t => {
-  var archive = await tutil.createArchive(daemon, [
-    'foo'
-  ])
-
-  const err1 = await t.throws(pda.writeFile(archive, '/bar/foo', 'new content'))
-  t.truthy(err1.parentFolderDoesntExist)
-
-  const err2 = await t.throws(pda.writeFile(archive, '/foo/bar', 'new content'))
-  t.truthy(err2.parentFolderDoesntExist)
-
-  const err3 = await t.throws(pda.mkdir(archive, '/bar/foo'))
-  t.truthy(err3.parentFolderDoesntExist)
-
-  const err4 = await t.throws(pda.mkdir(archive, '/foo/bar'))
-  t.truthy(err4.parentFolderDoesntExist)
-
-  const err5 = await t.throws(pda.copy(archive, '/foo', archive, '/bar/foo'))
-  t.truthy(err5.parentFolderDoesntExist)
-
-  const err6 = await t.throws(pda.rename(archive, '/foo', archive, '/bar/foo'))
-  t.truthy(err6.parentFolderDoesntExist)
-})
-
-test.skip('ParentFolderDoesntExistError w/fs', async t => {
-  var fs = await tutil.createFs([
-    'foo'
-  ])
-
-  const err1 = await t.throws(pda.writeFile(fs, '/bar/foo', 'new content'))
-  t.truthy(err1.parentFolderDoesntExist)
-
-  const err2 = await t.throws(pda.writeFile(fs, '/foo/bar', 'new content'))
-  t.truthy(err2.parentFolderDoesntExist)
-
-  const err3 = await t.throws(pda.mkdir(fs, '/bar/foo'))
-  t.truthy(err3.parentFolderDoesntExist)
-
-  const err4 = await t.throws(pda.mkdir(fs, '/foo/bar'))
-  t.truthy(err4.parentFolderDoesntExist)
-
-  const err5 = await t.throws(pda.copy(fs, '/foo', fs, '/bar/foo'))
-  t.truthy(err5.parentFolderDoesntExist)
-
-  const err6 = await t.throws(pda.rename(fs, '/foo', fs, '/bar/foo'))
-  t.truthy(err6.parentFolderDoesntExist)
 })
 
 async function doWriteStream (archive, path, data, opts) {

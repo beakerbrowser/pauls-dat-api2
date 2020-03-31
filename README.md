@@ -34,7 +34,7 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
   - [createReadStream(archive, name[, opts, cb])](#createreadstreamarchive-name-opts-cb)
 - [Write](#write)
   - [writeFile(archive, name, data[, opts, cb])](#writefilearchive-name-data-opts-cb)
-  - [mkdir(archive, name[, opts, cb])](#mkdirarchive-name-opts-cb)
+  - [mkdir(archive, name[, cb])](#mkdirarchive-name-cb)
   - [symlink(archive, target, linkname[, cb])](#symlinkarchive-target-linkname-cb)
   - [copy(srcArchive, srcName, dstArchive, dstName[, cb])](#copysrcarchive-srcname-dstarchive-dstname-cb)
   - [rename(srcArchive, srcName, dstName[, cb])](#renamesrcarchive-srcname-dstname-cb)
@@ -203,21 +203,18 @@ pda.createReadStream(archive, '/favicon.png', {
  - `data` Data to write (string|Buffer).
  - `opts`. Options (object|string). If a string, will act as `opts.encoding`.
  - `opts.encoding` Desired file encoding (string). May be 'binary', 'utf8', 'hex', or 'base64'. Default 'utf8' if `data` is a string, 'binary' if `data` is a Buffer.
- - `opts.ensureParent` If true, will create the parent folder if it does not exist.
- - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, InvalidEncodingError.
 
 ```js
 await pda.writeFile(archive, '/hello.txt', 'world', 'utf8')
 await pda.writeFile(archive, '/profile.png', fs.readFileSync('/tmp/dog.png'))
 ```
 
-### mkdir(archive, name[, opts, cb])
+### mkdir(archive, name[, cb])
 
  - `archive` Hyperdrive archive (object).
  - `name` Directory path (string).
- - `opts`. Options (object).
- - `opts.ensureParent` If true, will create the parent folder if it does not exist.
- - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, InvalidEncodingError.
 
 ```js
 await pda.mkdir(archive, '/stuff')
@@ -228,7 +225,7 @@ await pda.mkdir(archive, '/stuff')
  - `archive` Hyperdrive archive (object).
  - `target` Path to symlink to (string).
  - `linkname` Path to create the symlink (string).
- - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, InvalidEncodingError.
 
 ```js
 await pda.symlink(archive, '/hello.txt', '/goodbye.txt')
@@ -240,7 +237,7 @@ await pda.symlink(archive, '/hello.txt', '/goodbye.txt')
  - `srcName` Path to file or directory to copy (string).
  - `dstArchive` Destination Hyperdrive archive (object).
  - `dstName` Where to copy the file or folder to (string).
- - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, InvalidEncodingError.
 
 ```js
 // copy file:
@@ -255,7 +252,7 @@ await pda.copy(archive, '/stuff', otherArchive, '/stuff')
  - `srcName` Path to file or directory to rename (string).
  - `dstArchive` Destination Hyperdrive archive (object).
  - `dstName` What the file or folder should be named (string).
- - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError, InvalidEncodingError.
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, InvalidEncodingError.
 
 This is equivalent to moving a file/folder.
 
@@ -299,7 +296,7 @@ await pda.deleteMetadata(archive, '/hello.txt', ['foo'])
 
  - `archive` Hyperdrive archive (object).
  - `name` Entry path (string).
- - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, ParentFolderDoesntExistError.
+ - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError.
 
 ```js
 await pda.createWriteStream(archive, '/hello.txt')
@@ -336,7 +333,7 @@ await pda.rmdir(archive, '/stuff', {recursive: true})
  - `name` Entry path (string).
  - `opts`. Options (object|string). If a string or buffer, will act as `opts.key`.
  - `opts.key` Key of archive to mount. May be a hex string or Buffer.
- - Throws ArchiveNotWritableError, InvalidPathError, ParentFolderDoesntExistError
+ - Throws ArchiveNotWritableError, InvalidPathError
 
 ```js
 await pda.mount(archive, '/foo', archive2.key)
