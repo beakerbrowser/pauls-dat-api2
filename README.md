@@ -25,8 +25,7 @@ await pda.readFile(scopedfs, '/hello.txt') // read the local hello.txt
 
 
 - [Lookup](#lookup)
-  - [stat(archive, name[, cb])](#statarchive-name-cb)
-  - [lstat(archive, name[, cb])](#lstatarchive-name-cb)
+  - [stat(archive, name[, opts, cb])](#statarchive-name-opts-cb)
 - [Read](#read)
   - [readFile(archive, name[, opts, cb])](#readfilearchive-name-opts-cb)
   - [readdir(archive, path[, opts, cb])](#readdirarchive-path-opts-cb)
@@ -70,10 +69,11 @@ const pda = require('pauls-dat-api')
 
 ## Lookup
 
-### stat(archive, name[, cb])
+### stat(archive, name[, opts, cb])
 
  - `archive` Hyperdrive archive (object).
  - `name` Entry name (string).
+ - `opts.lstat` Get symlink information if target is a symlink (boolean).
  - Returns a Hyperdrive Stat entry (object).
  - Throws NotFoundError
 
@@ -99,19 +99,6 @@ Stat {
   mtime: 2017-04-10T18:59:00.147Z,
   ctime: 2017-04-10T18:59:00.147Z,
   linkname: undefined } */
-```
-
-### lstat(archive, name[, cb])
-
- - `archive` Hyperdrive archive (object).
- - `name` Entry name (string).
- - Returns a Hyperdrive Stat entry (object).
- - Throws NotFoundError
-
-```js
-// by name:
-var st = await pda.lstat(archive, '/index.json')
-st.isSymbolicLink()
 ```
 
 ## Read
