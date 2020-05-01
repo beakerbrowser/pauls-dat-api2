@@ -236,6 +236,42 @@ test('exportArchiveToFilesystem', async t => {
   t.deepEqual(statsC.fileCount, 2)
 })
 
+test('exportArchiveToFilesystem with recursive mounts', async t => {
+  const archive1 = await tutil.createArchive(daemon, [
+    'foo.txt',
+    { name: 'bar.data', content: Buffer.from([0x00, 0x01]) },
+    'subdir/',
+    'subdir/foo.txt',
+    { name: 'subdir/bar.data', content: Buffer.from([0x00, 0x01]) }
+  ])
+  var archive2 = await tutil.createArchive(daemon, [
+    'bar'
+  ])
+
+  await pda.mount(archive1, '/mount1', archive2.key)
+  await pda.mount(archive2, '/mount2', archive1.key)
+
+  const dstPath = (await tmp.dir({ unsafeCleanup: true })).path
+
+  // export all
+  // =
+
+  const stats = await pda.exportArchiveToFilesystem({
+    srcArchive: archive1,
+    dstPath
+  })
+
+  const expectedAddedFiles = [
+    'foo.txt', 'bar.data', 'subdir/foo.txt', 'subdir/bar.data',
+    'mount1/bar',
+    'mount1/mount2/foo.txt', 'mount1/mount2/bar.data', 'mount1/mount2/subdir/foo.txt', 'mount1/mount2/subdir/bar.data',
+  ].map(n => path.join(dstPath, n))
+  stats.addedFiles.sort(); expectedAddedFiles.sort()
+  t.deepEqual(stats.addedFiles, expectedAddedFiles)
+  t.deepEqual(stats.updatedFiles, [])
+  t.deepEqual(stats.fileCount, 9)
+})
+
 test('exportArchiveToArchive', async t => {
   const srcArchiveMount = await tutil.createArchive(daemon, [
     'mountfile',
@@ -344,4 +380,3 @@ test('exportArchiveToArchive', async t => {
     dstPath: '/foo.txt'
   }))
 })
-
