@@ -1,7 +1,7 @@
 const ScopedFS = require('scoped-fs')
 const tmp = require('tmp-promise')
 const dht = require('@hyperswarm/dht')
-const loadClient = require('hyperdrive-daemon-client/lib/loader')
+const { HyperdriveClient } = require('hyperdrive-daemon-client')
 const HyperdriveDaemon = require('hyperdrive-daemon')
 
 const BASE_PORT = 4101
@@ -51,7 +51,6 @@ async function createDaemonInstance (id, port, bootstrap) {
 
   const token = `test-token-${id}`
   const endpoint = `localhost:${port}`
-  var client
 
   const daemon = new HyperdriveDaemon({
     storage: path,
@@ -64,16 +63,13 @@ async function createDaemonInstance (id, port, bootstrap) {
   })
   await daemon.start()
 
-  return new Promise((resolve, reject) => {
-    return loadClient(endpoint, token, (err, c) => {
-      client = c
-      if (err) return reject(err)
-      return resolve({
-        client,
-        cleanup
-      })
-    })
-  })
+  const client = new HyperdriveClient(endpoint, token)
+  await client.ready()
+
+  return {
+    client,
+    cleanup
+  }
 
   async function cleanup () {
     await daemon.stop()
