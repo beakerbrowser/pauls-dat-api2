@@ -27,11 +27,15 @@ test('exportFilesystemToArchive', async t => {
   // initial import (dry run)
   // =
 
+  var progressHits = 0
   const statsADry = await pda.exportFilesystemToArchive({
     srcPath,
     dstArchive,
     inplaceImport: true,
-    dryRun: true
+    dryRun: true,
+    progress (stats) {
+      progressHits++
+    }
   })
   var expectedAddedADry = ['/foo.txt', '/bar.data', '/subdir/foo.txt', '/subdir/bar.data']
   statsADry.addedFiles.sort(); expectedAddedADry.sort()
@@ -43,6 +47,7 @@ test('exportFilesystemToArchive', async t => {
   t.deepEqual(statsADry.skipCount, 0)
   t.deepEqual(statsADry.fileCount, 4)
   t.deepEqual(await pda.readdir(dstArchive, '/'), [])
+  t.is(progressHits, 6)
 
   // initial import
   // =

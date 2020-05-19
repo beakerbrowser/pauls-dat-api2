@@ -421,6 +421,7 @@ events.on('sync', args => {
  - `opts.ignore` Files not to copy (array of strings). Optional. Uses [anymatch](npm.im/anymatch).
  - `opts.inplaceImport` Should import source directory in-place? (boolean). If true and importing a directory, this will cause the directory's content to be copied directy into the `dstPath`. If false, will cause the source-directory to become a child of the `dstPath`.
  - `opts.dryRun` Don't actually make changes, just list what changes will occur. Optional, defaults to `false`.
+ - `opts.progress` Function called with the `stats` object on each file updated.
  - Returns stats on the export.
 
 Copies a file-tree into an archive.
