@@ -585,3 +585,11 @@ Output looks like:
   {type: 'del', name: 'hello.txt'}
 ]
 ```
+
+## Util
+
+### setInvalidAuthHandler(fn)
+
+ - `fn` Function. Required.
+
+Sets a handler for when the daemon fails authentication. This can occur sometimes because the daemon has reset recently, forcing the auth token to change.
