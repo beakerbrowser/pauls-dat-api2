@@ -92,12 +92,14 @@ test(readTest, 'dir/', null, (t, err) => {
 
 test('readFile encodings', async t => {
   var archive = await tutil.createArchive(daemon, [
-    { name: 'buf', content: Buffer.from([0x00, 0x01, 0x02, 0x03]) }
+    { name: 'buf', content: Buffer.from([0x00, 0x01, 0x02, 0x03]) },
+    { name: 'test.json', content: '{"hello":"world"}'}
   ])
 
   await t.deepEqual(await pda.readFile(archive, 'buf', 'binary'), Buffer.from([0x00, 0x01, 0x02, 0x03]))
   await t.deepEqual(await pda.readFile(archive, 'buf', 'hex'), '00010203')
   await t.deepEqual(await pda.readFile(archive, 'buf', 'base64'), 'AAECAw==')
+  await t.deepEqual(await pda.readFile(archive, 'test.json', 'json'), {hello: 'world'})
 })
 
 test.skip('readFile encodings w/fs', async t => {

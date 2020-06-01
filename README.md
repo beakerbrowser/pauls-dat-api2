@@ -108,12 +108,13 @@ Stat {
  - `archive` Hyperdrive archive (object).
  - `name` Entry path (string).
  - `opts`. Options (object|string). If a string, will act as `opts.encoding`.
- - `opts.encoding` Desired output encoding (string). May be 'binary', 'utf8', 'hex', or 'base64'. Default 'utf8'.
+ - `opts.encoding` Desired output encoding (string). May be 'binary', 'utf8', 'hex', 'base64', or 'json'. Default 'utf8'.
  - Returns the content of the file in the requested encoding.
  - Throws NotFoundError.
 
 ```js
 var manifestStr = await pda.readFile(archive, '/index.json')
+var manifestObj = await pda.readFile(archive, '/index.json', 'json')
 var imageBase64 = await pda.readFile(archive, '/favicon.png', 'base64')
 ```
 
@@ -189,11 +190,12 @@ pda.createReadStream(archive, '/favicon.png', {
  - `name` Entry path (string).
  - `data` Data to write (string|Buffer).
  - `opts`. Options (object|string). If a string, will act as `opts.encoding`.
- - `opts.encoding` Desired file encoding (string). May be 'binary', 'utf8', 'hex', or 'base64'. Default 'utf8' if `data` is a string, 'binary' if `data` is a Buffer.
+ - `opts.encoding` Desired file encoding (string). May be 'binary', 'utf8', 'hex', 'base64', or 'json'. Default 'utf8' if `data` is a string, 'binary' if `data` is a Buffer.
  - Throws ArchiveNotWritableError, InvalidPathError, EntryAlreadyExistsError, InvalidEncodingError.
 
 ```js
 await pda.writeFile(archive, '/hello.txt', 'world', 'utf8')
+await pda.writeFile(archive, '/thing.json', {hello: 'world'}, 'json')
 await pda.writeFile(archive, '/profile.png', fs.readFileSync('/tmp/dog.png'))
 ```
 

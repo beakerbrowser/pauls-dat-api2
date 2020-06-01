@@ -27,6 +27,8 @@ test('writeFile', async t => {
   t.deepEqual(await pda.readFile(archive, 'foo', 'buffer'), Buffer.from([0x02]))
   await pda.writeFile(archive, 'foo', 'Aw==', { encoding: 'base64' })
   t.deepEqual(await pda.readFile(archive, 'foo', 'buffer'), Buffer.from([0x03]))
+  await pda.writeFile(archive, 'foo.json', {hello: 'world'}, { encoding: 'json' })
+  t.deepEqual(await pda.readFile(archive, 'foo.json', 'json'), {hello: 'world'})
 
   await pda.writeFile(archive, '/one/two/three.txt', 'asdf')
   t.deepEqual((await pda.stat(archive, '/one')).isDirectory(), true)
