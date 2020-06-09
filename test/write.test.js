@@ -48,6 +48,17 @@ test('writeFile', async t => {
   t.deepEqual(await pda.readFile(archive, '/a-file.txt/sub-file.txt'), 'fdsa')
 })
 
+test('writeFile preserves ctime and metadata', async t => {
+  var archive = await tutil.createArchive(daemon, [])
+
+  await pda.writeFile(archive, '/foo.txt', 'bar', {metadata: {hello: 'world'}})
+  var stat1 = await pda.stat(archive, '/foo.txt')
+  await pda.writeFile(archive, '/foo.txt', 'baz')
+  var stat2 = await pda.stat(archive, '/foo.txt')
+  t.deepEqual(stat1.ctime, stat2.ctime)
+  t.deepEqual(stat1.metadata, stat2.metadata)
+})
+
 test.skip('writeFile w/fs', async t => {
   var fs = await tutil.createFs([
     'foo'
