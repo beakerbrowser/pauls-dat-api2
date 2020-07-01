@@ -1,6 +1,6 @@
 {
   "name": "pauls-dat-api2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Beaker's DatArchive implementation for Dat 2.0",
   "main": "index.js",
   "scripts": {
