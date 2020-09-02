@@ -24,7 +24,7 @@
   "homepage": "https://github.com/beakerbrowser/pauls-dat-api2#readme",
   "dependencies": {
     "anymatch": "^1.3.2",
-    "beaker-error-constants": "^1.4.0",
+    "beaker-error-constants": "^1.5.0",
     "call-me-maybe": "^1.0.1",
     "dat-encoding": "^4.0.2",
     "diff-file-tree": "^2.3.2",
