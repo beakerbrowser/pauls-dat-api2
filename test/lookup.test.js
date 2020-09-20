@@ -122,7 +122,7 @@ test('files have metadata, folders have no metadata', async t => {
   var st = await pda.stat(target, '/foo')
   t.is(st.isDirectory(), false)
   t.is(st.isFile(), true)
-  // t.truthy(st.blocks > 0) TODO
+  t.truthy(st.blocks > 0)
   t.truthy(st.size > 0)
 
   var st = await pda.stat(target, '/subdir')
