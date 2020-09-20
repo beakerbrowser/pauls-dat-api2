@@ -37,8 +37,8 @@
     "@hyperswarm/dht": "^1.0.1",
     "ava": "^0.18.1",
     "concat-stream": "^2.0.0",
-    "hyperdrive-daemon": "beta",
-    "hyperdrive-daemon-client": "beta",
+    "hyperdrive-daemon": "latest",
+    "hyperdrive-daemon-client": "latest",
     "into-stream": "^5.1.1",
     "scoped-fs": "^1.4.1",
     "tmp-promise": "^2.0.2"
