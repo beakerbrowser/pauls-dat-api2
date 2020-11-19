@@ -307,6 +307,26 @@ test('exportArchiveToArchive', async t => {
     'otherfile.txt'
   ])
 
+  // dry run
+  // =
+
+  var res = await pda.exportArchiveToArchive({
+    srcArchive: srcArchiveA,
+    dstArchive: dstArchiveA,
+    dryRun: true
+  })
+
+  t.deepEqual((await pda.readdir(dstArchiveA, '/')).sort(), [])
+  t.deepEqual(res, {
+    addedFiles: [ '/foo.txt', '/bar.data', '/subdir/foo.txt', '/subdir/bar.data' ],
+    addedFolders: [ '/', '/mount', '/subdir' ],
+    updatedFiles: [],
+    removedFiles: [],
+    removedFolders: [],
+    skipCount: 0,
+    fileCount: 4,
+    totalSize: 18
+  })
 
   // export all
   // =

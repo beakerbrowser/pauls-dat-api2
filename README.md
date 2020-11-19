@@ -484,6 +484,7 @@ console.log(stats) /* => {
  - `opts.dstPath` Destination path within the destination archive (string). Optional, defaults to '/'.
  - `opts.ignore` Files not to copy (array of strings). Optional. Uses [anymatch](npm.im/anymatch).
  - `opts.skipUndownloadedFiles` Ignore files that haven't been downloaded yet (boolean). Default false. If false, will wait for source files to download.
+ - `opts.dryRun` Don't actually make changes, just list what changes will occur. Optional, defaults to `false`.
 
 Copies an archive into another archive.
 
@@ -500,6 +501,9 @@ var stats = await pda.exportArchiveToArchive({
 console.log(stats) /* => {
   addedFiles: ['fuzz.txt', 'foo/bar.txt'],
   updatedFiles: ['something.txt'],
+  removedFiles: ['hi.png'],
+  addedFolders: ['foo']
+  removedFolders: [],
   fileCount: 3,
   totalSize: 400 // bytes
 }*/
