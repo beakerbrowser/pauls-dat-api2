@@ -485,6 +485,7 @@ console.log(stats) /* => {
  - `opts.ignore` Files not to copy (array of strings). Optional. Uses [anymatch](npm.im/anymatch).
  - `opts.skipUndownloadedFiles` Ignore files that haven't been downloaded yet (boolean). Default false. If false, will wait for source files to download.
  - `opts.dryRun` Don't actually make changes, just list what changes will occur. Optional, defaults to `false`.
+ - `opts.intoTargetFolder` Export into the `dstPath` target folder instead of replacing it.
 
 Copies an archive into another archive.
 

@@ -277,7 +277,7 @@ test('exportArchiveToFilesystem with recursive mounts', async t => {
   t.deepEqual(stats.fileCount, 9)
 })
 
-test('exportArchiveToArchive', async t => {
+test.only('exportArchiveToArchive', async t => {
   const srcArchiveMount = await tutil.createArchive(daemon, [
     'mountfile',
     'mountdir/'
@@ -306,6 +306,7 @@ test('exportArchiveToArchive', async t => {
     'subdir/bar.data/hi',
     'otherfile.txt'
   ])
+  const dstArchiveF = await tutil.createArchive(daemon)
 
   // dry run
   // =
@@ -404,4 +405,16 @@ test('exportArchiveToArchive', async t => {
     dstArchive: dstArchiveE,
     dstPath: '/foo.txt'
   }))
+
+  // individual file
+  // =
+
+  await pda.exportArchiveToArchive({
+    srcArchive: srcArchiveA,
+    srcPath: '/foo.txt',
+    dstArchive: dstArchiveF,
+    intoTargetFolder: true
+  })
+
+  t.deepEqual((await pda.readdir(dstArchiveF, '/')).sort(), ['foo.txt'].sort())
 })
